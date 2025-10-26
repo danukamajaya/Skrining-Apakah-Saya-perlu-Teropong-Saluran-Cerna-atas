@@ -31,6 +31,10 @@ h2,h3 {font-weight:700;}
 div[data-testid="stImage"] img {
     margin-top: 20px;
 
+/* Geser tulisan judul ke bawah */
+.title-text h1 {
+  margin-top: 20px;
+
 /* HEADER: layout kolom + ukuran logo aman */
 .header-wrap {padding: 6px 0 4px 0;}
 /* Banner tip mobile */
