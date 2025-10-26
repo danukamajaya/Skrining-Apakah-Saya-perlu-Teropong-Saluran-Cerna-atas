@@ -1,87 +1,116 @@
-# app.py — Skrining Endoskopi Saluran Cerna Atas (EGD) – Tema RS Kariadi
-# Berdasarkan UpToDate 2025, ACG GERD 2022, PNPK Dispepsia Kemenkes 2021
+# app.py — Skrining Endoskopi Saluran Cerna Atas (EGD) – Tema RS Kariadi + Mobile Friendly
 # © 2025 dr. Danu Kamajaya, Sp.PD – RSUP Dr. Kariadi Semarang
+# Berdasar ringkasan: UpToDate 2025, ACG GERD 2022, PNPK Dispepsia Kemenkes 2021
 
 import streamlit as st
 from datetime import datetime
 
-# -------------- PAGE CONFIG --------------
+# ------------------ PAGE CONFIG ------------------
 st.set_page_config(
     page_title="Apakah Saya Perlu Teropong Saluran Cerna Atas?",
     page_icon="🩺",
     layout="wide",
 )
 
-# -------------- THEME: RS Kariadi (teal & lime) --------------
-# Warna acuan (mendekati logo): teal = #00B3AD, dark teal = #007C80, lime = #CFE23A
+# ------------------ THEME (RS Kariadi) ------------------
 CUSTOM_CSS = """
 <style>
-/* Background gradasi lembut hijau-teal khas RS Kariadi */
+/* Background gradasi lembut */
 .stApp {
   background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 55%, #e6fffb 100%);
   color: #1c1c1c;
 }
-
-/* Kontainer utama lebih lapang */
-.block-container {padding-top: 1.5rem; padding-bottom: 2rem;}
-
-/* Judul & subjudul bernuansa medis */
-h1, h2, h3 {color: #007C80;}
-h1 {font-weight: 800;}
-h2, h3 {font-weight: 700;}
-
-/* Kartu hasil agar menonjol */
-.result-card {
-  border: 2px solid #00B3AD22;
-  border-radius: 14px;
-  padding: 1rem 1.2rem;
-  background: #ffffffc9;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+.block-container {padding-top: 1.2rem; padding-bottom: 2rem;}
+h1, h2, h3 {color:#007C80;}
+h1 {font-weight:800;}
+h2,h3 {font-weight:700;}
+/* Banner hint mobile */
+.notice {
+  background:#e0f2f1; border:1px solid #b2dfdb; color:#004d40;
+  padding:.6rem .8rem; border-radius:10px; margin-bottom: .75rem;
+  box-shadow:0 4px 14px rgba(0,0,0,.05);
 }
-
-/* Badge warna hasil */
-.badge {display:inline-block; padding: .35rem .65rem; border-radius: 999px; font-weight:700;}
+.notice b {color:#00695c;}
+/* Kartu hasil */
+.result-card {
+  border: 2px solid #00B3AD22; border-radius:14px; padding:1rem 1.2rem;
+  background:#ffffffcc; box-shadow:0 6px 18px rgba(0,0,0,.06);
+}
+/* Badge hasil */
+.badge {display:inline-block; padding:.35rem .65rem; border-radius:999px; font-weight:700;}
 .badge-red {background:#ffebee; color:#c62828; border:1px solid #ffcdd2;}
 .badge-green {background:#e8f5e9; color:#1b5e20; border:1px solid #c8e6c9;}
 .badge-gray {background:#eceff1; color:#37474f; border:1px solid #cfd8dc;}
-
 /* Expander header */
 .streamlit-expanderHeader {background:#f0fdfa; color:#007C80; font-weight:700; border:1px solid #b2dfdb;}
-/* Checkbox teks tebal */
-div[data-testid="stMarkdown"] p {margin-bottom: .35rem;}
-label.css-1bjm3wi, label.css-16huue1, label[data-testid="stMarkdownContainer"] {font-size: 1.02rem;}
-
 /* Tombol reset */
 button[kind="secondary"] {background:#00B3AD !important; color:#fff !important; border:none !important;}
 button[kind="secondary"]:hover {background:#009b96 !important;}
 /* Footer */
 .footer-note {color:#004d40; font-size:.9rem;}
+/* Responsive tweak untuk HP */
+@media (max-width: 640px){
+  .mobile-hide {display:none;}
+}
 </style>
 """
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
-# -------------- HEADER + LOGO --------------
-left, mid, right = st.columns([1,1,1])
-with left:
-    st.image("logo_kariadi.png", width=240, caption=None)  # pastikan file ada di repo
-with mid:
-    st.title("Apakah Saya Perlu Teropong Saluran Cerna Atas?")
-    st.caption(
-        "Alat bantu sederhana untuk menilai apakah Anda mungkin memerlukan pemeriksaan "
-        "teropong saluran cerna atas (endoskopi/EGD). Berdasarkan panduan klinis terbaru. "
-        "Hasil bersifat edukasi, bukan diagnosis medis."
+# ------------------ HEADER + LOGO (proporsional) ------------------
+col_logo, col_title = st.columns([0.25, 0.75])
+with col_logo:
+    st.image("logo_kariadi.png", use_container_width=True)
+with col_title:
+    st.markdown(
+        """
+        <h1 style='font-size:2.6rem; font-weight:800; color:#007C80; margin-bottom:0.25rem;'>
+        Apakah Saya Perlu Teropong Saluran Cerna Atas?
+        </h1>
+        <p style='font-size:1.05rem; color:#333; margin-top:0.4rem;'>
+        Alat bantu sederhana untuk menilai apakah Anda mungkin memerlukan pemeriksaan 
+        teropong saluran cerna atas (<i>endoskopi/EGD</i>). Berdasarkan panduan klinis terbaru. 
+        Hasil bersifat edukasi, bukan diagnosis medis.
+        </p>
+        """,
+        unsafe_allow_html=True
     )
+
+st.markdown("<hr style='margin-top:0.2rem;margin-bottom:0.8rem;border:1px solid #cfd8dc;'/>",
+            unsafe_allow_html=True)
+
+# ------------------ SIDEBAR: identitas ------------------
+st.sidebar.header("Identitas (opsional)")
+sb_name = st.sidebar.text_input("Nama (opsional)", key="sb_name")
+sb_age = st.sidebar.number_input("Usia (tahun)", min_value=0, max_value=120, value=45, step=1, key="sb_age")
+sb_sex = st.sidebar.selectbox("Jenis kelamin", ["Laki-laki", "Perempuan", "Lainnya"], index=0, key="sb_sex")
+
+# Hint untuk HP: arahkan buka sidebar + sediakan input alternatif
+st.markdown(
+    """
+<div class="notice">
+<b>Tip:</b> Jika Anda menggunakan HP dan **sidebar tidak terlihat**, 
+klik ikon **☰** di kiri atas untuk membuka sidebar. 
+Atau isi data diri melalui <b>form alternatif</b> di bawah ini.
+</div>
+""", unsafe_allow_html=True
+)
+
+with st.expander("📄 Form Alternatif Data Diri (gunakan jika sidebar tidak terlihat)"):
+    alt_name = st.text_input("Nama", value=sb_name or "")
+    alt_age = st.number_input("Usia (tahun)", min_value=0, max_value=120,
+                              value=int(sb_age) if sb_age is not None else 45, step=1)
+    alt_sex = st.selectbox("Jenis kelamin", ["Laki-laki", "Perempuan", "Lainnya"],
+                           index=(["Laki-laki","Perempuan","Lainnya"].index(sb_sex)
+                                  if sb_sex in ["Laki-laki","Perempuan","Lainnya"] else 0))
+# Sinkronisasi ringan: gunakan sidebar jika ada, jika kosong pakai form alternatif
+name = sb_name or alt_name
+age = int(sb_age) if sb_name or sb_age else int(alt_age)
+sex = sb_sex or alt_sex
+today = datetime.today().strftime("%d %b %Y")
 
 st.markdown("---")
 
-# -------------- SIDEBAR --------------
-st.sidebar.header("Identitas (opsional)")
-name = st.sidebar.text_input("Nama")
-age = st.sidebar.number_input("Usia (tahun)", min_value=0, max_value=120, value=45, step=1)
-sex = st.sidebar.selectbox("Jenis kelamin", ["Laki-laki", "Perempuan", "Lainnya"], index=0)
-today = datetime.today().strftime("%d %b %Y")
-
-# -------------- CHECKLISTS --------------
+# ------------------ DAFTAR CEKLIS ------------------
 ALARM_ITEMS = [
     "Saya **muntah darah** (hematemesis)",
     "BAB saya **hitam pekat seperti aspal** (melena)",
@@ -110,7 +139,7 @@ OTHER_INDICATIONS = [
     "**Kontrol endoskopi** pasca pengobatan ulkus/varises/polipektomi (sesuai anjuran dokter)",
 ]
 
-# -------------- RESET BUTTON --------------
+# ------------------ TOMBOL RESET ------------------
 def reset_all():
     for key in list(st.session_state.keys()):
         if key.startswith(("alarm_", "risk_", "other_")):
@@ -119,7 +148,7 @@ def reset_all():
 
 st.button("↺ Reset semua jawaban", on_click=reset_all, type="secondary")
 
-# -------------- LAYOUT CEKLIS --------------
+# ------------------ LAYOUT CEKLIS ------------------
 c1, c2, c3 = st.columns(3)
 
 with c1:
@@ -148,7 +177,7 @@ with c3:
 
 st.markdown("---")
 
-# -------------- PENILAIAN HASIL --------------
+# ------------------ PENILAIAN HASIL ------------------
 alarm_selected = len(alarm_selected_labels) > 0
 risk_selected = len(risk_selected_labels) > 0
 other_selected = len(other_selected_labels) > 0
@@ -200,9 +229,12 @@ else:
 """
     reasons = []
 
-# -------------- OUTPUT (KARTU HASIL) --------------
+# ------------------ OUTPUT ------------------
 st.subheader("📋 Hasil Skrining")
-st.markdown(f'<div class="result-card"><span class="{badge_class}">{verdict_text}</span><br/>{advice}</div>', unsafe_allow_html=True)
+st.markdown(
+    f'<div class="result-card"><span class="{badge_class}">{verdict_text}</span><br/>{advice}</div>',
+    unsafe_allow_html=True
+)
 
 with st.expander("Alasan yang terdeteksi"):
     if reasons:
@@ -211,9 +243,10 @@ with st.expander("Alasan yang terdeteksi"):
     else:
         st.write("Tidak ada pilihan yang tercentang.")
 
-# -------------- FOOTER --------------
+# ------------------ FOOTER ------------------
 st.markdown("---")
-st.markdown("🔒 **Privasi:** Aplikasi ini tidak menyimpan data pribadi Anda. Semua isian hanya tampil di perangkat Anda.", help="Tidak ada penyimpanan server.")
+st.markdown("🔒 **Privasi:** Aplikasi ini tidak menyimpan data pribadi Anda. Semua isian hanya tampil di perangkat Anda.",
+            help="Tidak ada penyimpanan server.")
 st.markdown(
     '<p class="footer-note"><b>Catatan:</b> Hasil ini bersifat edukatif dan tidak menggantikan penilaian dokter. '
     'Jika keluhan berat, mendadak, atau menetap, segera konsultasikan ke dokter penyakit dalam.</p>',
