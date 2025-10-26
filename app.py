@@ -1,6 +1,6 @@
-# app.py — Skrining EGD (versi awam, 2 kategori)
-# Disederhanakan sesuai masukan: tanpa unduhan ringkasan & tanpa bagian sumber ilmiah.
-# "Kuning (ikterus)" TIDAK lagi termasuk Tanda Bahaya.
+# app.py — Skrining EGD berbasis Alarm Symptoms Valid (UpToDate & ACG 2022)
+# Disederhanakan: hanya dua hasil (segera / elektif)
+# Danu Kamajaya, Sp.PD (K)GEH – RSUP Dr. Kariadi Semarang – 2025
 
 import streamlit as st
 from datetime import datetime
@@ -15,7 +15,8 @@ st.set_page_config(
 st.title("💡 Apakah Saya Perlu Teropong Saluran Cerna Atas?")
 st.caption(
     "Alat bantu sederhana untuk menilai apakah Anda mungkin memerlukan pemeriksaan "
-    "teropong saluran cerna atas (endoskopi/EGD). Hasil ini bersifat edukasi."
+    "teropong saluran cerna atas (endoskopi/EGD). Berdasarkan panduan UpToDate & ACG 2022. "
+    "Hasil ini bersifat edukasi, bukan diagnosis medis."
 )
 
 # ------------------ SIDEBAR IDENTITAS ------------------
@@ -27,76 +28,60 @@ today = datetime.today().strftime("%d %b %Y")
 
 st.markdown("---")
 
-# ===================== CHECKLIST (versi awam, disederhanakan) =====================
+# ===================== CHECKLIST =====================
+st.subheader("🚨 Tanda Bahaya (Alarm Symptoms)")
+
 ALARM_ITEMS = [
-    "Saya muntah darah",
-    "BAB saya hitam pekat seperti aspal (melena)",
-    "Saya makin **sulit menelan** (disfagia progresif) atau **nyeri saat menelan** (odynofagia)",
-    "Berat badan saya **turun banyak** tanpa sebab jelas",
-    "Saya diberi tahu darah saya **kurang (anemia)** atau tampak sangat pucat/lemas",
-    "Perut bagian atas terasa **penuh/tersumbat** (dicurigai sumbatan lambung)",
-    # Catatan: "kuning/ikterus" dihapus dari alarm items sesuai permintaan
+    "Saya **muntah darah** (hematemesis)",
+    "BAB saya **hitam pekat seperti aspal** (melena)",
+    "Saya makin **sulit menelan** (disfagia progresif)",
+    "Saya **nyeri saat menelan** (odynofagia)",
+    "Berat badan saya **turun banyak tanpa sebab jelas**",
+    "Saya diberi tahu darah saya **kurang (anemia)** atau saya tampak pucat/lemas",
+    "Saya **sering muntah berulang atau tidak bisa makan/minum**",
+    "Perut bagian atas terasa **penuh / cepat kenyang / tersumbat** (curiga sumbatan lambung)",
 ]
 
-NON_URGENT_ITEMS = [
-    "Keluhan perut atas/nyeri ulu hati/panas di dada **>6 minggu** dan belum membaik dengan obat",
-    "Saya sering **mual** atau **muntah berulang**",
-    "Sering terasa **asam/panas naik ke tenggorokan** (refluks/GERD) **dan tidak membaik** dengan obat",
-    "**Nyeri ulu hati** tetap ada meskipun sudah minum obat lambung",
-    "Saya pernah diberi tahu ada **tukak/ulkus lambung/duodenum** dan keluhan masih berlanjut",
-    "Ada **keluarga dekat** pernah kena **kanker lambung**",
-    "Saya **baru muncul keluhan** ini setelah usia **50 tahun**",
-]
+st.markdown(
+    "Jika Anda mengalami salah satu dari tanda di bawah ini, pemeriksaan endoskopi biasanya "
+    "dianjurkan **segera** untuk mencari penyebab yang lebih serius."
+)
 
-SPECIAL_CASE_ITEMS = [
-    "Saya/anak **menelan baterai kecil** atau **benda tajam**",
-    "Saya **menelan cairan pembersih/kimia (zat korosif)**",
-    "Saya merasa makanan/tulang **tersangkut di tenggorokan** (sulit menelan total/impaksi makanan)",
-    "Saya punya **penyakit hati kronis/sirosis** (perlu skrining varises esofagus—sesuai penilaian dokter)",
-]
-
-# ------------------ LAYOUT 3 KOLOM ------------------
-c1, c2, c3 = st.columns(3)
-
-with c1:
-    st.subheader("🚨 Tanda Bahaya")
-    alarm_selected_labels = []
-    for i, label in enumerate(ALARM_ITEMS):
-        if st.checkbox(label, key=f"alarm_{i}"):
-            alarm_selected_labels.append(label)
-
-with c2:
-    st.subheader("🩹 Keluhan Umum (Tidak Darurat)")
-    nonurgent_selected_labels = []
-    for i, label in enumerate(NON_URGENT_ITEMS):
-        if st.checkbox(label, key=f"nonurgent_{i}"):
-            nonurgent_selected_labels.append(label)
-
-with c3:
-    st.subheader("⚠️ Kondisi Khusus")
-    special_selected_labels = []
-    for i, label in enumerate(SPECIAL_CASE_ITEMS):
-        if st.checkbox(label, key=f"special_{i}"):
-            special_selected_labels.append(label)
+alarm_selected_labels = []
+for i, label in enumerate(ALARM_ITEMS):
+    if st.checkbox(label, key=f"alarm_{i}"):
+        alarm_selected_labels.append(label)
 
 st.markdown("---")
 
-# ===================== PENILAIAN HASIL (2 kategori) =====================
+# ===================== CHECKLIST TAMBAHAN (RISIKO) =====================
+st.subheader("⚠️ Faktor Risiko Tambahan (Bukan Darurat, tapi Perlu Diperiksa)")
+NON_URGENT_ITEMS = [
+    "Saya **baru mengalami keluhan lambung/dispepsia setelah usia 50 tahun**",
+    "Ada **keluarga dekat** yang pernah terkena **kanker lambung**",
+]
+nonurgent_selected_labels = []
+for i, label in enumerate(NON_URGENT_ITEMS):
+    if st.checkbox(label, key=f"risk_{i}"):
+        nonurgent_selected_labels.append(label)
+
+st.markdown("---")
+
+# ===================== PENILAIAN HASIL =====================
 alarm_selected = len(alarm_selected_labels) > 0
-special_selected = len(special_selected_labels) > 0
 nonurgent_selected = len(nonurgent_selected_labels) > 0
 
-if alarm_selected or special_selected:
+if alarm_selected:
     verdict = "🔴 Anda **perlu endoskopi segera**"
-    advice = "Segera ke unit gawat darurat atau layanan endoskopi terdekat."
-    reasons = alarm_selected_labels + special_selected_labels
+    advice = "Segera periksa ke unit gawat darurat atau layanan endoskopi terdekat."
+    reasons = alarm_selected_labels
 elif nonurgent_selected:
-    verdict = "🟢 Anda dapat **menjadwalkan endoskopi (elektif)**"
-    advice = "Buat janji melalui poliklinik/rujukan sesuai ketersediaan."
+    verdict = "🟢 Anda **dapat menjadwalkan endoskopi (elektif)**"
+    advice = "Buat janji melalui poliklinik atau rujukan sesuai ketersediaan."
     reasons = nonurgent_selected_labels
 else:
-    verdict = "⚪ Saat ini **belum tampak kebutuhan endoskopi**"
-    advice = "Pertimbangkan terapi empiris & edukasi; konsultasikan bila keluhan berlanjut."
+    verdict = "⚪ Saat ini **belum tampak kebutuhan mendesak untuk endoskopi**"
+    advice = "Pertimbangkan terapi empiris, ubah pola makan, dan konsultasikan bila keluhan berlanjut."
     reasons = []
 
 st.subheader("📋 Hasil Skrining")
@@ -114,6 +99,7 @@ st.markdown("---")
 
 # ------------------ FOOTER ------------------
 st.markdown(
-    "> **Catatan:** Hasil ini bersifat umum dan tidak menggantikan penilaian dokter. Bila keluhan berat atau mendadak, segera ke IGD."
+    "> **Catatan:** Hasil ini bersifat edukatif dan tidak menggantikan penilaian dokter. "
+    "Jika Anda memiliki keluhan berat, mendadak, atau terus-menerus, segera konsultasikan ke dokter penyakit dalam."
 )
 st.caption("© 2025 | Aplikasi edukasi oleh **dr. Danu Kamajaya, Sp.PD** – RSUP Dr. Kariadi Semarang – Versi Awam")
