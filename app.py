@@ -27,6 +27,10 @@ h1, h2, h3 {color:#007C80;}
 h1 {font-weight:800;}
 h2,h3 {font-weight:700;}
 
+/* Geser logo sedikit ke bawah */
+div[data-testid="stImage"] img {
+    margin-top: 10px;
+
 /* HEADER: layout kolom + ukuran logo aman */
 .header-wrap {padding: 6px 0 4px 0;}
 /* Banner tip mobile */
