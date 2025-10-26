@@ -166,4 +166,4 @@ st.markdown("---")
 st.markdown("🩺 **Catatan:** Hasil ini bersifat umum dan tidak menggantikan penilaian dokter. Jika Anda memiliki keluhan berat atau mendadak, segera periksa ke unit gawat darurat atau dokter penyakit dalam.")
 
 st.markdown("---")
-st.caption("© 2025 | Aplikasi edukasi oleh dr. Danu Kamajaya – Versi Awam")
+st.caption("© 2025 | Aplikasi edukasi oleh dr. Danu Kamajaya, Sp.PD – Versi Awam")
