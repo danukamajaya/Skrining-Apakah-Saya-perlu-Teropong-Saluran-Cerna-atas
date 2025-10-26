@@ -68,7 +68,7 @@ alarm_selected = len(alarm_selected_labels) > 0
 nonurgent_selected = len(nonurgent_selected_labels) > 0
 
 if alarm_selected:
-    verdict = "🔴 Anda **perlu endoskopi segera**"
+    verdict = "🔴 Anda **perlu endoskopi**"
     # ✅ Bahasa disesuaikan lebih aman dan empatik
     advice = "Segera periksa ke unit gawat darurat atau **konsultasikan ke dokter Anda**."
     reasons = alarm_selected_labels
