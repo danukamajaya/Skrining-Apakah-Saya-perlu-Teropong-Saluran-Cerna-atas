@@ -33,7 +33,7 @@ div[data-testid="stImage"] img {
 
 /* Geser tulisan judul ke bawah */
 .title-text h1 {
-  margin-top: 25px;
+  margin-top: 35px;
 }
 
 /* HEADER: layout kolom + ukuran logo aman */
