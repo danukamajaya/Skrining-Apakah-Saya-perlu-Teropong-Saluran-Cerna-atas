@@ -1,17 +1,14 @@
 # app.py — Skrining EGD berbasis Alarm Symptoms Valid (UpToDate & ACG 2022)
-# Disederhanakan: hanya dua hasil (segera / elektif)
 # Danu Kamajaya, Sp.PD (K)GEH – RSUP Dr. Kariadi Semarang – 2025
 
 import streamlit as st
 from datetime import datetime
 
-# ------------------ CONFIG ------------------
 st.set_page_config(
     page_title="Apakah Saya Perlu Teropong Saluran Cerna Atas?",
     layout="wide",
 )
 
-# ------------------ HEADER ------------------
 st.title("💡 Apakah Saya Perlu Teropong Saluran Cerna Atas?")
 st.caption(
     "Alat bantu sederhana untuk menilai apakah Anda mungkin memerlukan pemeriksaan "
@@ -19,7 +16,6 @@ st.caption(
     "Hasil ini bersifat edukasi, bukan diagnosis medis."
 )
 
-# ------------------ SIDEBAR IDENTITAS ------------------
 st.sidebar.header("Identitas (opsional)")
 name = st.sidebar.text_input("Nama")
 age = st.sidebar.number_input("Usia (tahun)", min_value=0, max_value=120, value=45, step=1)
@@ -28,7 +24,7 @@ today = datetime.today().strftime("%d %b %Y")
 
 st.markdown("---")
 
-# ===================== CHECKLIST =====================
+# ------------------ CHECKLIST ------------------
 st.subheader("🚨 Tanda Bahaya (Alarm Symptoms)")
 
 ALARM_ITEMS = [
@@ -54,7 +50,7 @@ for i, label in enumerate(ALARM_ITEMS):
 
 st.markdown("---")
 
-# ===================== CHECKLIST TAMBAHAN (RISIKO) =====================
+# ------------------ FAKTOR RISIKO TAMBAHAN ------------------
 st.subheader("⚠️ Faktor Risiko Tambahan (Bukan Darurat, tapi Perlu Diperiksa)")
 NON_URGENT_ITEMS = [
     "Saya **baru mengalami keluhan lambung/dispepsia setelah usia 50 tahun**",
@@ -67,17 +63,18 @@ for i, label in enumerate(NON_URGENT_ITEMS):
 
 st.markdown("---")
 
-# ===================== PENILAIAN HASIL =====================
+# ------------------ PENILAIAN HASIL ------------------
 alarm_selected = len(alarm_selected_labels) > 0
 nonurgent_selected = len(nonurgent_selected_labels) > 0
 
 if alarm_selected:
     verdict = "🔴 Anda **perlu endoskopi segera**"
-    advice = "Segera periksa ke unit gawat darurat atau layanan endoskopi terdekat."
+    # ✅ Bahasa disesuaikan lebih aman dan empatik
+    advice = "Segera periksa ke unit gawat darurat atau **konsultasikan ke dokter Anda**."
     reasons = alarm_selected_labels
 elif nonurgent_selected:
     verdict = "🟢 Anda **dapat menjadwalkan endoskopi (elektif)**"
-    advice = "Buat janji melalui poliklinik atau rujukan sesuai ketersediaan."
+    advice = "Buat janji melalui poliklinik atau **konsultasikan ke dokter Anda** untuk rencana pemeriksaan."
     reasons = nonurgent_selected_labels
 else:
     verdict = "⚪ Saat ini **belum tampak kebutuhan mendesak untuk endoskopi**"
