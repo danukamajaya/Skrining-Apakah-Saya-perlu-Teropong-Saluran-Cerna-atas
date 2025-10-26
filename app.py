@@ -1,7 +1,6 @@
-# app.py — Skrining EGD (Endoskopi Saluran Cerna Atas) – Versi Awam
-# 3 kelompok ceklis: Alarm, Faktor Risiko, Indikasi Lain (Non-Alarm)
-# Hasil: "Perlu endoskopi segera" atau "Dapat menjadwalkan endoskopi (elektif)"
-# © 2025 dr. Danu Kamajaya, Sp.PD (K)GEH – RSUP Dr. Kariadi Semarang
+# app.py — Skrining Endoskopi Saluran Cerna Atas (EGD) – Versi Edukasi Lengkap
+# Berdasarkan UpToDate 2025, ACG GERD Guideline 2022, PNPK Dispepsia Kemenkes 2021
+# © 2025 dr. Danu Kamajaya, Sp.PD – RSUP Dr. Kariadi Semarang
 
 import streamlit as st
 from datetime import datetime
@@ -16,7 +15,8 @@ st.set_page_config(
 st.title("💡 Apakah Saya Perlu Teropong Saluran Cerna Atas?")
 st.caption(
     "Alat bantu sederhana untuk menilai apakah Anda mungkin memerlukan pemeriksaan "
-    "teropong saluran cerna atas (endoskopi/EGD). Hasil ini bersifat edukasi, bukan diagnosis."
+    "teropong saluran cerna atas (endoskopi/EGD). Berdasarkan panduan klinis terbaru. "
+    "Hasil bersifat edukasi, bukan diagnosis medis."
 )
 
 # ------------------ SIDEBAR IDENTITAS ------------------
@@ -29,7 +29,6 @@ today = datetime.today().strftime("%d %b %Y")
 st.markdown("---")
 
 # ===================== DAFTAR CEKLIS =====================
-# A. Alarm (urgent)
 ALARM_ITEMS = [
     "Saya **muntah darah** (hematemesis)",
     "BAB saya **hitam pekat seperti aspal** (melena)",
@@ -41,13 +40,11 @@ ALARM_ITEMS = [
     "Perut bagian atas terasa **penuh / cepat kenyang / tersumbat** (curiga sumbatan lambung)",
 ]
 
-# B. Faktor risiko (elektif bila tanpa alarm)
 RISK_ITEMS = [
     "Saya **baru mengalami keluhan lambung/dispepsia setelah usia 50 tahun**",
     "Ada **keluarga dekat** yang pernah terkena **kanker lambung**",
 ]
 
-# C. Indikasi lain (non-alarm, elektif bila tanpa alarm)
 OTHER_INDICATIONS = [
     "Keluhan perut atas/nyeri ulu hati/panas di dada **>4–6 minggu** dan belum membaik dengan obat",
     "**Nyeri ulu hati** tetap ada meskipun sudah minum obat lambung (PPI 4–8 minggu)",
@@ -67,8 +64,8 @@ def reset_all():
             st.session_state[key] = False
     st.rerun()
 
-right_reset = st.columns([1,1,1,1,1,1,1,1,1,1,1])[10]
-with right_reset:
+col_reset = st.columns([1,1,1,1,1,1,1,1,1,1,1])[10]
+with col_reset:
     st.button("↺ Reset semua jawaban", on_click=reset_all)
 
 # ------------------ LAYOUT CEKLIS ------------------
@@ -107,7 +104,7 @@ other_selected = len(other_selected_labels) > 0
 
 if alarm_selected:
     verdict = "🔴 Anda **perlu endoskopi segera**"
-    advice = "Segera periksa ke unit gawat darurat atau **konsultasikan ke dokter Anda**."
+    advice = "Segera periksa ke unit gawat darurat atau **konsultasikan ke dokter Anda.**"
     reasons = alarm_selected_labels
 elif risk_selected or other_selected:
     verdict = "🟢 Anda **dapat menjadwalkan endoskopi (elektif)**"
@@ -115,7 +112,41 @@ elif risk_selected or other_selected:
     reasons = risk_selected_labels + other_selected_labels
 else:
     verdict = "⚪ Saat ini **belum tampak kebutuhan mendesak untuk endoskopi**"
-    advice = "Pertimbangkan terapi empiris, ubah pola makan, dan konsultasikan bila keluhan berlanjut."
+    advice = """
+🌿 **Langkah-langkah yang dapat Anda lakukan untuk menjaga kesehatan lambung dan mencegah kekambuhan:**
+
+### 🥗 1️⃣ Atur Pola Makan
+- Makan dalam porsi kecil tetapi sering (4–5 kali per hari)
+- Hindari makan terburu-buru, kunyah makanan dengan baik
+- Jangan langsung berbaring minimal **2–3 jam setelah makan**
+- Kurangi makanan berlemak, pedas, asam, cokelat, kopi, teh kental, minuman bersoda, dan alkohol
+- Pilih buah dan sayur rendah asam seperti pisang, pepaya, semangka, melon, labu, dan brokoli
+- Minum air putih cukup setiap hari
+
+### 💊 2️⃣ Hati-hati terhadap Penggunaan Obat
+- Hindari minum **obat nyeri (NSAID seperti ibuprofen, asam mefenamat, piroksikam)** tanpa petunjuk dokter
+- Jika harus menggunakannya, konsultasikan agar dokter memberikan **pelindung lambung (misalnya PPI)**
+- Hindari merokok dan minuman beralkohol
+
+### ⚖️ 3️⃣ Perbaiki Gaya Hidup
+- **Tidur dengan kepala sedikit lebih tinggi** (10–20 cm) untuk mencegah asam naik ke tenggorokan
+- Hindari pakaian atau ikat pinggang yang terlalu ketat di perut
+- Pertahankan **berat badan ideal**, karena berat badan berlebih meningkatkan tekanan di lambung
+- Kelola stres, karena stres dapat memperburuk gejala lambung
+
+### 🏃‍♂️ 4️⃣ Lakukan Olahraga yang Tepat
+- Pilih olahraga **ringan hingga sedang**: jalan kaki cepat, bersepeda santai, yoga, peregangan, atau berenang ringan
+- Lakukan **30–45 menit per hari, minimal 5 hari per minggu**
+- Hindari olahraga berat (angkat beban, sit-up, plank) atau aktivitas menunduk lama **segera setelah makan**
+- Tunggu minimal **2 jam setelah makan** sebelum berolahraga
+
+### ⏱️ 5️⃣ Evaluasi dan Pemeriksaan Lanjutan
+- Jika keluhan tidak membaik setelah **4–6 minggu** melakukan perubahan pola hidup dan pengobatan lambung, konsultasikan kembali ke dokter Anda
+- Dokter dapat menyarankan pemeriksaan **bakteri *H. pylori*** atau tindakan lain sebelum endoskopi
+- Bila muncul **tanda bahaya baru** seperti muntah darah, BAB hitam, berat badan turun, atau anemia, segera periksa ke **dokter penyakit dalam**
+
+💬 Dengan pola hidup sehat dan pengobatan terarah, sebagian besar keluhan lambung dapat membaik tanpa perlu tindakan endoskopi segera.
+"""
     reasons = []
 
 # ------------------ OUTPUT ------------------
