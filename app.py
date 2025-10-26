@@ -1,4 +1,4 @@
-# app.py — Skrining Endoskopi Saluran Cerna Atas (EGD) – Tema RS Kariadi + Mobile Friendly
+# app.py — Skrining Endoskopi Saluran Cerna Atas (EGD) – Tema RS Kariadi (fixed logo header)
 # © 2025 dr. Danu Kamajaya, Sp.PD – RSUP Dr. Kariadi Semarang
 # Berdasar ringkasan: UpToDate 2025, ACG GERD 2022, PNPK Dispepsia Kemenkes 2021
 
@@ -20,17 +20,36 @@ CUSTOM_CSS = """
   background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 55%, #e6fffb 100%);
   color: #1c1c1c;
 }
-.block-container {padding-top: 1.2rem; padding-bottom: 2rem;}
+/* Kontainer utama agak turun sedikit agar logo tidak nempel atas */
+.block-container {padding-top: 14px; padding-bottom: 2rem;}
 h1, h2, h3 {color:#007C80;}
 h1 {font-weight:800;}
 h2,h3 {font-weight:700;}
-/* Banner hint mobile */
+
+/* HEADER: flex layout agar logo tidak terpotong */
+.header-wrap {
+  display:flex; align-items:center; gap:24px; padding:6px 0 4px 0;
+}
+.logo-wrap {
+  flex: 0 0 240px;   /* lebar area logo, bisa diubah 200–280px */
+  max-width: 28vw;  /* biar responsif di layar kecil */
+  display:flex; align-items:center;
+}
+.logo-wrap img {
+  width:auto; max-width:100%;
+  height:auto; max-height:80px;   /* tinggi logo dikendalikan di sini */
+  object-fit:contain;             /* supaya tidak ke-crop */
+}
+.title-wrap {flex: 1 1 auto;}
+
+/* Banner tip mobile */
 .notice {
   background:#e0f2f1; border:1px solid #b2dfdb; color:#004d40;
   padding:.6rem .8rem; border-radius:10px; margin-bottom: .75rem;
   box-shadow:0 4px 14px rgba(0,0,0,.05);
 }
 .notice b {color:#00695c;}
+
 /* Kartu hasil */
 .result-card {
   border: 2px solid #00B3AD22; border-radius:14px; padding:1rem 1.2rem;
@@ -48,35 +67,39 @@ button[kind="secondary"] {background:#00B3AD !important; color:#fff !important; 
 button[kind="secondary"]:hover {background:#009b96 !important;}
 /* Footer */
 .footer-note {color:#004d40; font-size:.9rem;}
+
 /* Responsive tweak untuk HP */
 @media (max-width: 640px){
-  .mobile-hide {display:none;}
+  .logo-wrap {max-width: 42vw;}
+  .logo-wrap img {max-height:64px;}
+  .title-wrap h1 {font-size: 2.05rem !important;}
 }
 </style>
 """
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
-# ------------------ HEADER + LOGO (proporsional) ------------------
-col_logo, col_title = st.columns([0.25, 0.75])
-with col_logo:
-    st.image("logo_kariadi.png", use_container_width=True)
-with col_title:
-    st.markdown(
-        """
-        <h1 style='font-size:2.6rem; font-weight:800; color:#007C80; margin-bottom:0.25rem;'>
-        Apakah Saya Perlu Teropong Saluran Cerna Atas?
-        </h1>
-        <p style='font-size:1.05rem; color:#333; margin-top:0.4rem;'>
-        Alat bantu sederhana untuk menilai apakah Anda mungkin memerlukan pemeriksaan 
-        teropong saluran cerna atas (<i>endoskopi/EGD</i>). Berdasarkan panduan klinis terbaru. 
-        Hasil bersifat edukasi, bukan diagnosis medis.
-        </p>
-        """,
-        unsafe_allow_html=True
-    )
-
-st.markdown("<hr style='margin-top:0.2rem;margin-bottom:0.8rem;border:1px solid #cfd8dc;'/>",
-            unsafe_allow_html=True)
+# ------------------ HEADER + LOGO (anti crop) ------------------
+st.markdown(
+    """
+<div class="header-wrap">
+  <div class="logo-wrap">
+    <img src="logo_kariadi.png" alt="RS Kariadi Logo"/>
+  </div>
+  <div class="title-wrap">
+    <h1 style="font-size:2.6rem; font-weight:800; color:#007C80; margin:0;">
+      Apakah Saya Perlu Teropong Saluran Cerna Atas?
+    </h1>
+    <p style="font-size:1.05rem; color:#333; margin:.45rem 0 0 0;">
+      Alat bantu sederhana untuk menilai apakah Anda mungkin memerlukan pemeriksaan
+      teropong saluran cerna atas (<i>endoskopi/EGD</i>). Berdasarkan panduan klinis terbaru.
+      Hasil bersifat edukasi, bukan diagnosis medis.
+    </p>
+  </div>
+</div>
+<hr style="margin-top:.6rem;margin-bottom:.9rem;border:1px solid #cfd8dc;"/>
+""",
+    unsafe_allow_html=True
+)
 
 # ------------------ SIDEBAR: identitas ------------------
 st.sidebar.header("Identitas (opsional)")
@@ -84,13 +107,13 @@ sb_name = st.sidebar.text_input("Nama (opsional)", key="sb_name")
 sb_age = st.sidebar.number_input("Usia (tahun)", min_value=0, max_value=120, value=45, step=1, key="sb_age")
 sb_sex = st.sidebar.selectbox("Jenis kelamin", ["Laki-laki", "Perempuan", "Lainnya"], index=0, key="sb_sex")
 
-# Hint untuk HP: arahkan buka sidebar + sediakan input alternatif
+# Hint untuk HP + form alternatif
 st.markdown(
     """
 <div class="notice">
-<b>Tip:</b> Jika Anda menggunakan HP dan **sidebar tidak terlihat**, 
-klik ikon **☰** di kiri atas untuk membuka sidebar. 
-Atau isi data diri melalui <b>form alternatif</b> di bawah ini.
+<b>Tip:</b> Jika Anda menggunakan HP dan <i>sidebar</i> tidak terlihat,
+klik ikon <b>☰</b> di kiri atas untuk membuka sidebar. Atau isi data diri melalui
+<b>form alternatif</b> di bawah ini.
 </div>
 """, unsafe_allow_html=True
 )
@@ -102,7 +125,8 @@ with st.expander("📄 Form Alternatif Data Diri (gunakan jika sidebar tidak ter
     alt_sex = st.selectbox("Jenis kelamin", ["Laki-laki", "Perempuan", "Lainnya"],
                            index=(["Laki-laki","Perempuan","Lainnya"].index(sb_sex)
                                   if sb_sex in ["Laki-laki","Perempuan","Lainnya"] else 0))
-# Sinkronisasi ringan: gunakan sidebar jika ada, jika kosong pakai form alternatif
+
+# Sinkronisasi ringan
 name = sb_name or alt_name
 age = int(sb_age) if sb_name or sb_age else int(alt_age)
 sex = sb_sex or alt_sex
