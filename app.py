@@ -72,7 +72,7 @@ for p in ["logo_kariadi.png", "./logo_kariadi.png", "/app/logo_kariadi.png"]:
         logo = p
         break
 
-col_logo, col_title = st.columns([0.90, 0.75])
+col_logo, col_title = st.columns([0.25, 0.90])
 
 with col_logo:
     if logo:
