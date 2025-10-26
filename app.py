@@ -1,34 +1,87 @@
-# app.py — Skrining Endoskopi Saluran Cerna Atas (EGD) – Versi Edukasi Lengkap
-# Berdasarkan UpToDate 2025, ACG GERD Guideline 2022, PNPK Dispepsia Kemenkes 2021
+# app.py — Skrining Endoskopi Saluran Cerna Atas (EGD) – Tema RS Kariadi
+# Berdasarkan UpToDate 2025, ACG GERD 2022, PNPK Dispepsia Kemenkes 2021
 # © 2025 dr. Danu Kamajaya, Sp.PD – RSUP Dr. Kariadi Semarang
 
 import streamlit as st
 from datetime import datetime
 
-# ------------------ CONFIG ------------------
+# -------------- PAGE CONFIG --------------
 st.set_page_config(
     page_title="Apakah Saya Perlu Teropong Saluran Cerna Atas?",
+    page_icon="🩺",
     layout="wide",
 )
 
-# ------------------ HEADER ------------------
-st.title("💡 Apakah Saya Perlu Teropong Saluran Cerna Atas?")
-st.caption(
-    "Alat bantu sederhana untuk menilai apakah Anda mungkin memerlukan pemeriksaan "
-    "teropong saluran cerna atas (endoskopi/EGD). Berdasarkan panduan klinis terbaru. "
-    "Hasil bersifat edukasi, bukan diagnosis medis."
-)
+# -------------- THEME: RS Kariadi (teal & lime) --------------
+# Warna acuan (mendekati logo): teal = #00B3AD, dark teal = #007C80, lime = #CFE23A
+CUSTOM_CSS = """
+<style>
+/* Background gradasi lembut hijau-teal khas RS Kariadi */
+.stApp {
+  background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 55%, #e6fffb 100%);
+  color: #1c1c1c;
+}
 
-# ------------------ SIDEBAR IDENTITAS ------------------
+/* Kontainer utama lebih lapang */
+.block-container {padding-top: 1.5rem; padding-bottom: 2rem;}
+
+/* Judul & subjudul bernuansa medis */
+h1, h2, h3 {color: #007C80;}
+h1 {font-weight: 800;}
+h2, h3 {font-weight: 700;}
+
+/* Kartu hasil agar menonjol */
+.result-card {
+  border: 2px solid #00B3AD22;
+  border-radius: 14px;
+  padding: 1rem 1.2rem;
+  background: #ffffffc9;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+/* Badge warna hasil */
+.badge {display:inline-block; padding: .35rem .65rem; border-radius: 999px; font-weight:700;}
+.badge-red {background:#ffebee; color:#c62828; border:1px solid #ffcdd2;}
+.badge-green {background:#e8f5e9; color:#1b5e20; border:1px solid #c8e6c9;}
+.badge-gray {background:#eceff1; color:#37474f; border:1px solid #cfd8dc;}
+
+/* Expander header */
+.streamlit-expanderHeader {background:#f0fdfa; color:#007C80; font-weight:700; border:1px solid #b2dfdb;}
+/* Checkbox teks tebal */
+div[data-testid="stMarkdown"] p {margin-bottom: .35rem;}
+label.css-1bjm3wi, label.css-16huue1, label[data-testid="stMarkdownContainer"] {font-size: 1.02rem;}
+
+/* Tombol reset */
+button[kind="secondary"] {background:#00B3AD !important; color:#fff !important; border:none !important;}
+button[kind="secondary"]:hover {background:#009b96 !important;}
+/* Footer */
+.footer-note {color:#004d40; font-size:.9rem;}
+</style>
+"""
+st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
+
+# -------------- HEADER + LOGO --------------
+left, mid, right = st.columns([1,1,1])
+with left:
+    st.image("logo_kariadi.png", width=240, caption=None)  # pastikan file ada di repo
+with mid:
+    st.title("Apakah Saya Perlu Teropong Saluran Cerna Atas?")
+    st.caption(
+        "Alat bantu sederhana untuk menilai apakah Anda mungkin memerlukan pemeriksaan "
+        "teropong saluran cerna atas (endoskopi/EGD). Berdasarkan panduan klinis terbaru. "
+        "Hasil bersifat edukasi, bukan diagnosis medis."
+    )
+
+st.markdown("---")
+
+# -------------- SIDEBAR --------------
 st.sidebar.header("Identitas (opsional)")
 name = st.sidebar.text_input("Nama")
 age = st.sidebar.number_input("Usia (tahun)", min_value=0, max_value=120, value=45, step=1)
 sex = st.sidebar.selectbox("Jenis kelamin", ["Laki-laki", "Perempuan", "Lainnya"], index=0)
 today = datetime.today().strftime("%d %b %Y")
 
-st.markdown("---")
-
-# ===================== DAFTAR CEKLIS =====================
+# -------------- CHECKLISTS --------------
 ALARM_ITEMS = [
     "Saya **muntah darah** (hematemesis)",
     "BAB saya **hitam pekat seperti aspal** (melena)",
@@ -57,18 +110,16 @@ OTHER_INDICATIONS = [
     "**Kontrol endoskopi** pasca pengobatan ulkus/varises/polipektomi (sesuai anjuran dokter)",
 ]
 
-# ------------------ TOMBOL RESET ------------------
+# -------------- RESET BUTTON --------------
 def reset_all():
     for key in list(st.session_state.keys()):
         if key.startswith(("alarm_", "risk_", "other_")):
             st.session_state[key] = False
     st.rerun()
 
-col_reset = st.columns([1,1,1,1,1,1,1,1,1,1,1])[10]
-with col_reset:
-    st.button("↺ Reset semua jawaban", on_click=reset_all)
+st.button("↺ Reset semua jawaban", on_click=reset_all, type="secondary")
 
-# ------------------ LAYOUT CEKLIS ------------------
+# -------------- LAYOUT CEKLIS --------------
 c1, c2, c3 = st.columns(3)
 
 with c1:
@@ -97,21 +148,24 @@ with c3:
 
 st.markdown("---")
 
-# ===================== PENILAIAN HASIL =====================
+# -------------- PENILAIAN HASIL --------------
 alarm_selected = len(alarm_selected_labels) > 0
 risk_selected = len(risk_selected_labels) > 0
 other_selected = len(other_selected_labels) > 0
 
 if alarm_selected:
-    verdict = "🔴 Anda **perlu endoskopi segera**"
+    verdict_text = "🔴 Anda **perlu endoskopi segera**"
+    badge_class = "badge badge-red"
     advice = "Segera periksa ke unit gawat darurat atau **konsultasikan ke dokter Anda.**"
     reasons = alarm_selected_labels
 elif risk_selected or other_selected:
-    verdict = "🟢 Anda **dapat menjadwalkan endoskopi (elektif)**"
+    verdict_text = "🟢 Anda **dapat menjadwalkan endoskopi (elektif)**"
+    badge_class = "badge badge-green"
     advice = "Buat janji melalui poliklinik atau **konsultasikan ke dokter Anda** untuk rencana pemeriksaan."
     reasons = risk_selected_labels + other_selected_labels
 else:
-    verdict = "⚪ Saat ini **belum tampak kebutuhan mendesak untuk endoskopi**"
+    verdict_text = "⚪ Saat ini **belum tampak kebutuhan mendesak untuk endoskopi**"
+    badge_class = "badge badge-gray"
     advice = """
 🌿 **Langkah-langkah yang dapat Anda lakukan untuk menjaga kesehatan lambung dan mencegah kekambuhan:**
 
@@ -120,39 +174,35 @@ else:
 - Hindari makan terburu-buru, kunyah makanan dengan baik
 - Jangan langsung berbaring minimal **2–3 jam setelah makan**
 - Kurangi makanan berlemak, pedas, asam, cokelat, kopi, teh kental, minuman bersoda, dan alkohol
-- Pilih buah dan sayur rendah asam seperti pisang, pepaya, semangka, melon, labu, dan brokoli
+- Pilih buah & sayur rendah asam (pisang, pepaya, melon/semangka, labu, brokoli)
 - Minum air putih cukup setiap hari
 
 ### 💊 2️⃣ Hati-hati terhadap Penggunaan Obat
-- Hindari minum **obat nyeri (NSAID seperti ibuprofen, asam mefenamat, piroksikam)** tanpa petunjuk dokter
-- Jika harus menggunakannya, konsultasikan agar dokter memberikan **pelindung lambung (misalnya PPI)**
-- Hindari merokok dan minuman beralkohol
+- Hindari **NSAID** (ibuprofen, asam mefenamat, piroksikam) tanpa petunjuk dokter
+- Jika harus, minta dokter mempertimbangkan **pelindung lambung (mis. PPI)**
+- Hindari merokok dan alkohol
 
 ### ⚖️ 3️⃣ Perbaiki Gaya Hidup
-- **Tidur dengan kepala sedikit lebih tinggi** (10–20 cm) untuk mencegah asam naik ke tenggorokan
-- Hindari pakaian atau ikat pinggang yang terlalu ketat di perut
-- Pertahankan **berat badan ideal**, karena berat badan berlebih meningkatkan tekanan di lambung
-- Kelola stres, karena stres dapat memperburuk gejala lambung
+- **Tidur dengan kepala sedikit lebih tinggi** (10–20 cm)
+- Hindari pakaian/ikat pinggang terlalu ketat
+- Pertahankan **berat badan ideal**
+- Kelola stres, istirahat cukup
 
-### 🏃‍♂️ 4️⃣ Lakukan Olahraga yang Tepat
-- Pilih olahraga **ringan hingga sedang**: jalan kaki cepat, bersepeda santai, yoga, peregangan, atau berenang ringan
-- Lakukan **30–45 menit per hari, minimal 5 hari per minggu**
-- Hindari olahraga berat (angkat beban, sit-up, plank) atau aktivitas menunduk lama **segera setelah makan**
-- Tunggu minimal **2 jam setelah makan** sebelum berolahraga
+### 🏃‍♂️ 4️⃣ Olahraga yang Tepat
+- Pilih olahraga **ringan–sedang**: jalan kaki cepat, bersepeda santai, yoga/peregangan, atau berenang ringan
+- Durasi **30–45 menit**, **≥5 hari/minggu**
+- Hindari olahraga berat/menunduk lama **segera setelah makan**; tunggu **≥2 jam** setelah makan
 
-### ⏱️ 5️⃣ Evaluasi dan Pemeriksaan Lanjutan
-- Jika keluhan tidak membaik setelah **4–6 minggu** melakukan perubahan pola hidup dan pengobatan lambung, konsultasikan kembali ke dokter Anda
-- Dokter dapat menyarankan pemeriksaan **bakteri *H. pylori*** atau tindakan lain sebelum endoskopi
-- Bila muncul **tanda bahaya baru** seperti muntah darah, BAB hitam, berat badan turun, atau anemia, segera periksa ke **dokter penyakit dalam**
-
-💬 Dengan pola hidup sehat dan pengobatan terarah, sebagian besar keluhan lambung dapat membaik tanpa perlu tindakan endoskopi segera.
+### ⏱️ 5️⃣ Evaluasi Lanjutan
+- Bila tidak membaik setelah **4–6 minggu**, konsultasikan kembali ke dokter Anda
+- Dokter mungkin menyarankan pemeriksaan **H. pylori** atau lainnya sebelum endoskopi
+- Jika muncul **tanda bahaya** (muntah darah, BAB hitam, berat turun, anemia), segera periksa ke **dokter penyakit dalam**
 """
     reasons = []
 
-# ------------------ OUTPUT ------------------
+# -------------- OUTPUT (KARTU HASIL) --------------
 st.subheader("📋 Hasil Skrining")
-st.markdown(f"**{verdict}**")
-st.write(advice)
+st.markdown(f'<div class="result-card"><span class="{badge_class}">{verdict_text}</span><br/>{advice}</div>', unsafe_allow_html=True)
 
 with st.expander("Alasan yang terdeteksi"):
     if reasons:
@@ -161,11 +211,12 @@ with st.expander("Alasan yang terdeteksi"):
     else:
         st.write("Tidak ada pilihan yang tercentang.")
 
-# ------------------ INFORMASI & FOOTER ------------------
+# -------------- FOOTER --------------
 st.markdown("---")
-st.markdown("🔒 **Privasi:** Aplikasi ini tidak menyimpan data pribadi Anda. Semua isian hanya tampil di perangkat Anda.")
+st.markdown("🔒 **Privasi:** Aplikasi ini tidak menyimpan data pribadi Anda. Semua isian hanya tampil di perangkat Anda.", help="Tidak ada penyimpanan server.")
 st.markdown(
-    "> **Catatan:** Hasil ini bersifat edukatif dan tidak menggantikan penilaian dokter. "
-    "Jika Anda memiliki keluhan berat, mendadak, atau menetap, segera konsultasikan ke dokter penyakit dalam."
+    '<p class="footer-note"><b>Catatan:</b> Hasil ini bersifat edukatif dan tidak menggantikan penilaian dokter. '
+    'Jika keluhan berat, mendadak, atau menetap, segera konsultasikan ke dokter penyakit dalam.</p>',
+    unsafe_allow_html=True
 )
 st.caption("© 2025 | Aplikasi edukasi oleh **dr. Danu Kamajaya, Sp.PD** – RSUP Dr. Kariadi Semarang – Versi Awam")
