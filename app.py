@@ -75,8 +75,8 @@ for p in ["logo_kariadi.png", "./logo_kariadi.png", "/app/logo_kariadi.png"]:
 col_logo, col_title = st.columns([0.25, 0.90])
 
 with col_logo:
+    st.markdown("<div style='margin-top:10px'></div>", unsafe_allow_html=True)  # ↓ turunkan sedikit
     if logo:
-        # st.image tidak memotong gambar; atur lebar agar proporsional
         st.image(logo, use_container_width=True)
     else:
         st.markdown(
