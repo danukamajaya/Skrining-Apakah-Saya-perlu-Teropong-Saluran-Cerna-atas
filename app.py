@@ -1,7 +1,6 @@
-# app.py
-# Aplikasi skrining sederhana (versi awam) apakah perlu teropong saluran cerna atas (EGD)
-# Disusun berdasar ringkasan UpToDate: "Overview of upper gastrointestinal endoscopy (EGD)"
-# Hasil hanya 2 kategori: PERLU SEGERA atau ELEKTIF
+# app.py — Skrining EGD (versi awam, 2 kategori)
+# Disederhanakan sesuai masukan: tanpa unduhan ringkasan & tanpa bagian sumber ilmiah.
+# "Kuning (ikterus)" TIDAK lagi termasuk Tanda Bahaya.
 
 import streamlit as st
 from datetime import datetime
@@ -28,7 +27,7 @@ today = datetime.today().strftime("%d %b %Y")
 
 st.markdown("---")
 
-# ===================== CHECKLIST (UPTODATE, versi awam) =====================
+# ===================== CHECKLIST (versi awam, disederhanakan) =====================
 ALARM_ITEMS = [
     "Saya muntah darah",
     "BAB saya hitam pekat seperti aspal (melena)",
@@ -36,7 +35,7 @@ ALARM_ITEMS = [
     "Berat badan saya **turun banyak** tanpa sebab jelas",
     "Saya diberi tahu darah saya **kurang (anemia)** atau tampak sangat pucat/lemas",
     "Perut bagian atas terasa **penuh/tersumbat** (dicurigai sumbatan lambung)",
-    "Kulit atau mata saya **kuning** (ikterus)",
+    # Catatan: "kuning/ikterus" dihapus dari alarm items sesuai permintaan
 ]
 
 NON_URGENT_ITEMS = [
@@ -111,45 +110,7 @@ with st.expander("Alasan yang terdeteksi"):
     else:
         st.write("Tidak ada pilihan yang tercentang.")
 
-# ===================== SUMMARIZE & DOWNLOAD =====================
-def build_summary():
-    lines = []
-    lines.append(f"Ringkasan Skrining EGD – {today}")
-    lines.append(f"Nama: {name or '-'} | Usia: {age} | JK: {sex}")
-    lines.append("")
-    lines.append(f"Hasil: {verdict}")
-    lines.append("Alasan:")
-    if reasons:
-        for i, r in enumerate(reasons, 1):
-            lines.append(f"  {i}. {r}")
-    else:
-        lines.append("  - (tidak ada)")
-    lines.append("")
-    lines.append("Catatan: Hasil ini bersifat edukasi dan tidak menggantikan penilaian dokter.")
-    return "\n".join(lines)
-
-summary_text = build_summary()
-st.download_button(
-    label="💾 Unduh Ringkasan (TXT)",
-    data=summary_text,
-    file_name=f"skrining_egd_{datetime.today().strftime('%Y%m%d_%H%M')}.txt",
-    mime="text/plain",
-)
-
 st.markdown("---")
-
-# ===================== SUMBER ILMIAH (RINGKASAN UPTODATE) =====================
-with st.expander("Sumber ilmiah (klik untuk lihat)"):
-    st.markdown(
-        """
-**UpToDate** — *Overview of upper gastrointestinal endoscopy (esophagogastroduodenoscopy, EGD)*.  
-Ringkasan yang diterapkan di aplikasi ini:
-- **Alarm features / Indications for EGD**: hematemesis, melena, disfagia progresif/odynofagia, penurunan berat badan tanpa sebab, anemia defisiensi besi, massa/obstruksi, ikterus.
-- **Urgent/emergent indications**: perdarahan aktif/instabilitas, menelan baterai/benda tajam/korosif, impaksi makanan.
-- **Elective indications**: dispepsia/GERD menetap **>4–6 minggu** tidak membaik dengan terapi, gejala baru usia **>50 tahun**, faktor risiko seperti riwayat keluarga kanker lambung, evaluasi pasca ulkus sesuai indikasi.
-*(Ringkasan ini ditulis untuk edukasi; silakan rujuk ke naskah UpToDate penuh untuk detail dan pembaruan.)*
-"""
-    )
 
 # ------------------ FOOTER ------------------
 st.markdown(
