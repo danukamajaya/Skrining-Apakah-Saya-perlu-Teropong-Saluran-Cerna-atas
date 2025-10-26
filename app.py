@@ -1,6 +1,6 @@
-# app.py — Skrining Endoskopi Saluran Cerna Atas (EGD) – Tema RS Kariadi (logo fix & no alt form)
+# app.py — Skrining Endoskopi Saluran Cerna Atas (EGD)
+# Tema RS Kariadi • Tanpa Sidebar (Data dasar di expander)
 # © 2025 dr. Danu Kamajaya, Sp.PD – RSUP Dr. Kariadi Semarang
-# Ringkasan panduan: UpToDate 2025, ACG GERD 2022, PNPK Dispepsia Kemenkes 2021
 
 import streamlit as st
 from datetime import datetime
@@ -16,53 +16,57 @@ st.set_page_config(
 # ------------------ THEME (RS Kariadi) ------------------
 CUSTOM_CSS = """
 <style>
+/* Sembunyikan sidebar & tombol collapse */
+[data-testid="stSidebar"] { display: none !important; }
+[data-testid="collapsedControl"] { display: none !important; }
+
 /* Background gradasi lembut */
 .stApp {
   background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 55%, #e6fffb 100%);
   color: #1c1c1c;
 }
+
 /* Kontainer utama turun sedikit agar header tidak nempel tepi */
-.block-container {padding-top: 14px; padding-bottom: 2rem;}
-h1, h2, h3 {color:#007C80;}
-h1 {font-weight:800;}
-h2,h3 {font-weight:700;}
+.block-container { padding-top: 14px; padding-bottom: 2rem; }
 
-/* Geser logo sedikit ke bawah */
-div[data-testid="stImage"] img {
-    margin-top: 40px;
+h1, h2, h3 { color:#007C80; }
+h1 { font-weight:800; }
+h2, h3 { font-weight:700; }
 
-/* HEADER: layout kolom + ukuran logo aman */
-.header-wrap {padding: 6px 0 4px 0;}
-/* Banner tip mobile */
-.notice {
-  background:#e0f2f1; border:1px solid #b2dfdb; color:#004d40;
-  padding:.6rem .8rem; border-radius:10px; margin-bottom: .75rem;
-  box-shadow:0 4px 14px rgba(0,0,0,.05);
+/* Turunkan logo sedikit */
+div[data-testid="stImage"] img { margin-top: 40px; }
+
+/* Header spacing */
+.header-wrap { padding: 6px 0 4px 0; }
+
+/* Expander header (data dasar + alasan) */
+.streamlit-expanderHeader {
+  background:#f0fdfa; color:#007C80; font-weight:700; border:1px solid #b2dfdb;
+  border-radius:10px;
 }
-.notice b {color:#00695c;}
 
 /* Kartu hasil */
 .result-card {
-  border: 2px solid #00B3AD22; border-radius:14px; padding:1rem 1.2rem;
+  border:2px solid #00B3AD22; border-radius:14px; padding:1rem 1.2rem;
   background:#ffffffcc; box-shadow:0 6px 18px rgba(0,0,0,.06);
 }
-/* Badge hasil */
-.badge {display:inline-block; padding:.35rem .65rem; border-radius:999px; font-weight:700;}
-.badge-red {background:#ffebee; color:#c62828; border:1px solid #ffcdd2;}
-.badge-green {background:#e8f5e9; color:#1b5e20; border:1px solid #c8e6c9;}
-.badge-gray {background:#eceff1; color:#37474f; border:1px solid #cfd8dc;}
 
-/* Expander header */
-.streamlit-expanderHeader {background:#f0fdfa; color:#007C80; font-weight:700; border:1px solid #b2dfdb;}
+/* Badge hasil */
+.badge { display:inline-block; padding:.35rem .65rem; border-radius:999px; font-weight:700; }
+.badge-red  { background:#ffebee; color:#c62828; border:1px solid #ffcdd2; }
+.badge-green{ background:#e8f5e9; color:#1b5e20; border:1px solid #c8e6c9; }
+.badge-gray { background:#eceff1; color:#37474f; border:1px solid #cfd8dc; }
+
 /* Tombol reset */
-button[kind="secondary"] {background:#00B3AD !important; color:#fff !important; border:none !important;}
-button[kind="secondary"]:hover {background:#009b96 !important;}
+button[kind="secondary"] { background:#00B3AD !important; color:#fff !important; border:none !important; }
+button[kind="secondary"]:hover { background:#009b96 !important; }
+
 /* Footer */
-.footer-note {color:#004d40; font-size:.9rem;}
+.footer-note { color:#004d40; font-size:.9rem; }
 
 /* Responsif HP */
 @media (max-width: 640px){
-  .title-text h1 {font-size: 2.05rem !important;}
+  .title-text h1 { font-size:2.05rem !important; }
 }
 </style>
 """
@@ -76,10 +80,10 @@ for p in ["logo_kariadi.png", "./logo_kariadi.png", "/app/logo_kariadi.png"]:
         logo = p
         break
 
-col_logo, col_title = st.columns([0.25, 0.90])
+col_logo, col_title = st.columns([0.25, 0.75])
 
 with col_logo:
-    st.markdown("<div style='margin-top:10px'></div>", unsafe_allow_html=True)  # ↓ turunkan sedikit
+    st.markdown("<div style='margin-top:10px'></div>", unsafe_allow_html=True)  # turunkan sedikit
     if logo:
         st.image(logo, use_container_width=True)
     else:
@@ -108,21 +112,13 @@ with col_title:
 st.markdown("<hr style='margin-top:0.2rem;margin-bottom:0.8rem;border:1px solid #cfd8dc;'/>",
             unsafe_allow_html=True)
 
-# ------------------ SIDEBAR: identitas ------------------
-st.sidebar.header("Identitas (opsional)")
-name = st.sidebar.text_input("Nama (opsional)")
-age = st.sidebar.number_input("Usia (tahun)", min_value=0, max_value=120, value=45, step=1)
-sex = st.sidebar.selectbox("Jenis kelamin", ["Laki-laki", "Perempuan", "Lainnya"], index=0)
-today = datetime.today().strftime("%d %b %Y")
+# ------------------ DATA DASAR (opsional) di konten utama ------------------
+with st.expander("🧑‍⚕️ Data dasar (opsional)", expanded=False):
+    name = st.text_input("Nama")
+    age  = st.number_input("Usia (tahun)", min_value=0, max_value=120, value=45, step=1)
+    sex  = st.selectbox("Jenis kelamin", ["Laki-laki", "Perempuan", "Lainnya"], index=0)
 
-# Hanya keterangan (tanpa form alternatif)
-st.markdown(
-    """
-<div class="notice">
-<b>Tip:</b> Untuk mengisi <b>Nama, Usia, dan Jenis Kelamin</b> silakan klik ikon <b>☰</b> di kiri atas untuk membuka <i>sidebar</i>.
-</div>
-""", unsafe_allow_html=True
-)
+today = datetime.today().strftime("%d %b %Y")
 
 st.markdown("---")
 
@@ -195,22 +191,22 @@ st.markdown("---")
 
 # ------------------ PENILAIAN HASIL ------------------
 alarm_selected = len(alarm_selected_labels) > 0
-risk_selected = len(risk_selected_labels) > 0
+risk_selected  = len(risk_selected_labels)  > 0
 other_selected = len(other_selected_labels) > 0
 
 if alarm_selected:
     verdict_text = "🔴 Anda **perlu endoskopi segera**"
-    badge_class = "badge badge-red"
+    badge_class  = "badge badge-red"
     advice = "Segera periksa ke unit gawat darurat atau **konsultasikan ke dokter Anda.**"
     reasons = alarm_selected_labels
 elif risk_selected or other_selected:
     verdict_text = "🟢 Anda **dapat menjadwalkan endoskopi (elektif)**"
-    badge_class = "badge badge-green"
+    badge_class  = "badge badge-green"
     advice = "Buat janji melalui poliklinik atau **konsultasikan ke dokter Anda** untuk rencana pemeriksaan."
     reasons = risk_selected_labels + other_selected_labels
 else:
     verdict_text = "⚪ Saat ini **belum tampak kebutuhan mendesak untuk endoskopi**"
-    badge_class = "badge badge-gray"
+    badge_class  = "badge badge-gray"
     advice = """
 🌿 **Langkah-langkah yang dapat Anda lakukan untuk menjaga kesehatan lambung dan mencegah kekambuhan:**
 
@@ -261,8 +257,10 @@ with st.expander("Alasan yang terdeteksi"):
 
 # ------------------ FOOTER ------------------
 st.markdown("---")
-st.markdown("🔒 **Privasi:** Aplikasi ini tidak menyimpan data pribadi Anda. Semua isian hanya tampil di perangkat Anda.",
-            help="Tidak ada penyimpanan server.")
+st.markdown(
+    "🔒 **Privasi:** Aplikasi ini tidak menyimpan data pribadi Anda. Semua isian hanya tampil di perangkat Anda.",
+    help="Tidak ada penyimpanan server."
+)
 st.markdown(
     '<p class="footer-note"><b>Catatan:</b> Hasil ini bersifat edukatif dan tidak menggantikan penilaian dokter. '
     'Jika keluhan berat, mendadak, atau menetap, segera konsultasikan ke dokter penyakit dalam.</p>',
