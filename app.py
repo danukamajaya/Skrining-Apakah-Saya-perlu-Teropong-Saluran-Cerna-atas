@@ -1,5 +1,5 @@
 # app.py — Skrining Endoskopi Saluran Cerna Atas (EGD)
-# Tema RS Kariadi • Tanpa Sidebar • Ilustrasi kanan-atas • Export PDF
+# Tema RS Kariadi • Tanpa Sidebar • Ilustrasi kanan-atas • Export PDF dg Kop Surat
 # © 2025 dr. Danu Kamajaya, Sp.PD – RS Kariadi Semarang
 
 import streamlit as st
@@ -7,10 +7,12 @@ from datetime import datetime
 from pathlib import Path
 from io import BytesIO
 
-# PDF
+# ---------- PDF ----------
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle
+from reportlab.lib import colors
+from reportlab.lib.units import cm
 
 # ------------------ PAGE CONFIG ------------------
 st.set_page_config(
@@ -39,7 +41,9 @@ h1, h2, h3 { color:#007C80; }
 h1 { font-weight:800; }
 h2, h3 { font-weight:700; }
 
+/* Header layout */
 .header-wrap { padding: 6px 0 4px 0; }
+.title-text { text-align:center; }
 
 /* Expander header (data dasar + alasan) */
 .streamlit-expanderHeader {
@@ -70,6 +74,7 @@ button[kind="secondary"]:hover { background:#009b96 !important; }
 .illustration-wrap {
   border:1px solid #d6eceb; border-radius:12px; padding:6px; background:#ffffffcc;
   box-shadow:0 6px 18px rgba(0,0,0,.05);
+  margin-left:auto; margin-right:0;
 }
 
 /* Responsif HP */
@@ -81,31 +86,31 @@ button[kind="secondary"]:hover { background:#009b96 !important; }
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
 # ------------------ HEADER: logo + judul + ilustrasi ------------------
-# Robus load logo
+# Robust load logo
 logo = None
 for p in ["logo_kariadi.png", "./logo_kariadi.png", "/app/logo_kariadi.png"]:
     if Path(p).exists():
         logo = p
         break
 
-# Robus load ilustrasi EGD
+# Robust load ilustrasi EGD
 egd_img = None
-for p in ["ilustrasi_egd.png", "egd_illustration.png", "egd_image.png"]:
+for p in ["ilustrasi_egd.png", "egd_illustration.png", "egd_image.png", "egd.png"]:
     if Path(p).exists():
         egd_img = p
         break
 
 # 3 kolom: logo | judul | ilustrasi
-col_logo, col_title, col_pic = st.columns([0.20, 0.40, 0.16])
+col_logo, col_title, col_pic = st.columns([0.22, 0.56, 0.22])
 
 with col_logo:
     # turunkan logo sedikit via spacer agar tidak nempel
-    st.markdown("<div style='margin-top:50px'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-top:40px'></div>", unsafe_allow_html=True)
     if logo:
         st.image(logo, use_container_width=True)
     else:
         st.markdown(
-            "<div style='font-weight:800; color:#007C80; font-size:1.4rem;'>Kemenkes<br/>RS Kariadi</div>",
+            "<div style='font-weight:800; color:#007C80; font-size:1.4rem;'>RSUP Dr. Kariadi</div>",
             unsafe_allow_html=True
         )
 
@@ -113,7 +118,7 @@ with col_title:
     st.markdown(
         """
         <div class="title-text">
-          <h1 style='font-size:2.6rem; font-weight:800; color:#007C80; margin-top:25px; margin-bottom:0.25rem;'>
+          <h1 style='font-size:2.6rem; font-weight:800; color:#007C80; margin-top:16px; margin-bottom:0.25rem;'>
             Apakah Saya Perlu Teropong Saluran Cerna Atas?
           </h1>
           <p style='font-size:1.05rem; color:#333; margin-top:0.4rem;'>
@@ -129,7 +134,8 @@ with col_title:
 with col_pic:
     if egd_img:
         st.markdown("<div class='illustration-wrap'>", unsafe_allow_html=True)
-        st.image(egd_img, width=260, caption="Skema endoskopi saluran cerna atas")  # misal 220 px
+        # atur lebar ilustrasi di sini (misal 240–280)
+        st.image(egd_img, width=240, caption="Skema endoskopi saluran cerna atas")
         st.markdown("</div>", unsafe_allow_html=True)
 
 st.markdown("<hr style='margin-top:0.2rem;margin-bottom:0.8rem;border:1px solid #cfd8dc;'/>",
@@ -137,9 +143,14 @@ st.markdown("<hr style='margin-top:0.2rem;margin-bottom:0.8rem;border:1px solid 
 
 # ------------------ DATA DASAR (opsional) ------------------
 with st.expander("🧑‍⚕️ Data dasar (opsional)", expanded=False):
-    name = st.text_input("Nama")
+    name = st.text_input("Nama", value="")
     age  = st.number_input("Usia (tahun)", min_value=0, max_value=120, value=45, step=1)
     sex  = st.selectbox("Jenis kelamin", ["Laki-laki", "Perempuan", "Lainnya"], index=0)
+
+# Defaults jika expander tidak dibuka (agar variabel selalu ada)
+if "age" not in locals(): age = 45
+if "sex" not in locals(): sex = "Laki-laki"
+if "name" not in locals(): name = ""
 
 today = datetime.today().strftime("%d %b %Y")
 
@@ -278,50 +289,106 @@ with st.expander("Alasan yang terdeteksi"):
     else:
         st.write("Tidak ada pilihan yang tercentang.")
 
-# ------------------ PDF EXPORT ------------------
+# ------------------ PDF EXPORT (KOP RS KARIADI) ------------------
 def build_pdf(name: str, age: int, sex: str, today: str,
               verdict_text: str, advice_md: str, reasons_list: list) -> bytes:
-    """Membangun PDF hasil skrining (return bytes)."""
+    """Bangun PDF hasil skrining dengan KOP RSUP Dr. Kariadi (return bytes)."""
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4)
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        leftMargin=2*cm, rightMargin=2*cm, topMargin=1.6*cm, bottomMargin=1.6*cm
+    )
+
     styles = getSampleStyleSheet()
+    normal = styles["Normal"]
+    title  = styles["Title"]
+
+    # cari logo RS
+    logo_rs = None
+    for p in ["logo_kariadi.png", "./logo_kariadi.png", "/app/logo_kariadi.png"]:
+        if Path(p).exists():
+            logo_rs = p
+            break
+
     elements = []
 
-    # Judul
-    elements.append(Paragraph("<b>Hasil Skrining Endoskopi Saluran Cerna Atas (EGD)</b>", styles["Title"]))
-    elements.append(Spacer(1, 12))
+    # KOP SURAT: logo kiri + teks tengah
+    if logo_rs:
+        img_rs = Image(logo_rs, width=3.2*cm, height=3.2*cm, hAlign='LEFT')
+    else:
+        img_rs = Paragraph("<b>RSUP Dr. Kariadi</b>", normal)
+
+    kop_html = (
+        "<para align='center'>"
+        "<b><font size='14'>RUMAH SAKIT UMUM PUSAT DOKTER KARIADI</font></b><br/>"
+        "<font size='10'>Jalan Dr. Sutomo No 16 Semarang PO BOX 1104</font><br/>"
+        "<font size='10'>Telepon : (024) 8413993, 8413476, 8413764 &nbsp;&nbsp; "
+        "<font color='#2e7d32'><b>Fax</b> : (024) 8318617</font></font><br/>"
+        "<font size='10'>Website : http://www.rskariadi.co.id</font>"
+        "</para>"
+    )
+    kop_text = Paragraph(kop_html, normal)
+
+    kop_tbl = Table([[img_rs, kop_text]], colWidths=[3.8*cm, None])
+    kop_tbl.setStyle(TableStyle([
+        ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ("ALIGN",  (0,0), (0,0), "LEFT"),
+        ("ALIGN",  (1,0), (1,0), "CENTER"),
+        ("LEFTPADDING",  (0,0), (-1,-1), 0),
+        ("RIGHTPADDING", (0,0), (-1,-1), 0),
+        ("TOPPADDING",   (0,0), (-1,-1), 0),
+        ("BOTTOMPADDING",(0,0), (-1,-1), 4),
+    ]))
+    elements.append(kop_tbl)
+    elements.append(Spacer(1, 4))
+
+    # garis pembatas
+    elements.append(Table([[""]], colWidths=[doc.width], style=TableStyle([
+        ("LINEBELOW", (0,0), (-1,-1), 1.2, colors.HexColor("#9EC9C7"))
+    ])))
+    elements.append(Spacer(1, 10))
+
+    # Judul dokumen
+    elements.append(Paragraph("<b>HASIL SKRINING ENDOSKOPI SALURAN CERNA ATAS (EGD)</b>", title))
+    elements.append(Spacer(1, 8))
 
     # Identitas
-    elements.append(Paragraph(f"<b>Tanggal:</b> {today}", styles["Normal"]))
-    if name:
-        elements.append(Paragraph(f"<b>Nama:</b> {name}", styles["Normal"]))
-    elements.append(Paragraph(f"<b>Usia:</b> {age} tahun", styles["Normal"]))
-    elements.append(Paragraph(f"<b>Jenis kelamin:</b> {sex}", styles["Normal"]))
-    elements.append(Spacer(1, 12))
+    def P(txt): return Paragraph(txt, normal)
+    elements += [
+        P(f"<b>Tanggal:</b> {today}"),
+        P(f"<b>Nama:</b> {name}") if name else None,
+        P(f"<b>Usia:</b> {age} tahun"),
+        P(f"<b>Jenis kelamin:</b> {sex}"),
+        Spacer(1, 8),
+    ]
+    elements = [e for e in elements if e is not None]
 
     # Hasil utama
-    elements.append(Paragraph(f"<b>Kesimpulan:</b> {verdict_text}", styles["Normal"]))
+    elements.append(P(f"<b>Kesimpulan:</b> {verdict_text}"))
     elements.append(Spacer(1, 6))
-    elements.append(Paragraph(advice_md.replace("\n", "<br/>"), styles["Normal"]))
-    elements.append(Spacer(1, 12))
+    elements.append(P(advice_md.replace("\n", "<br/>")))
+    elements.append(Spacer(1, 8))
 
-    # Alasan
+    # Alasan terdeteksi
     if reasons_list:
-        elements.append(Paragraph("<b>Faktor yang terdeteksi:</b>", styles["Normal"]))
+        elements.append(P("<b>Faktor yang terdeteksi:</b>"))
         for r in reasons_list:
-            elements.append(Paragraph(f"- {r}", styles["Normal"]))
-        elements.append(Spacer(1, 12))
+            elements.append(P(f"- {r}"))
+        elements.append(Spacer(1, 8))
 
     # Catatan
+    italic = ParagraphStyle("i", parent=normal, italic=True)
     elements.append(Paragraph(
         "Hasil ini bersifat edukatif dan tidak menggantikan penilaian dokter. "
         "Jika keluhan berat, mendadak, atau menetap, segera konsultasikan ke dokter penyakit dalam.",
-        styles["Italic"]
+        italic
     ))
 
     doc.build(elements)
     return buffer.getvalue()
 
+# Bangun PDF dan tombol unduh
 pdf_bytes = build_pdf(name or "", int(age), sex, today, verdict_text, advice, reasons)
 
 st.download_button(
