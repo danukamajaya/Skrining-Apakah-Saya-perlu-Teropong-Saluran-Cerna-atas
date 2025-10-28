@@ -21,7 +21,6 @@ st.set_page_config(
 
 # ------------------ THEME & CSS ------------------
 CUSTOM_CSS = """
-CUSTOM_CSS = """
 <style>
 /* Sembunyikan sidebar & tombol collapse */
 [data-testid="stSidebar"] { display: none !important; }
