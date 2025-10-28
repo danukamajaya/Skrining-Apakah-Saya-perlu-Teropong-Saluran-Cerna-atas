@@ -41,7 +41,7 @@ h1 { font-weight:800; }
 h2, h3 { font-weight:700; }
 
 /* Wrapper kolom kiri (logo + ilustrasi) */
-.left-stack .logo-wrap img{ margin-top: 25px; }   /* turunkan logo */
+.left-stack .logo-wrap img{ margin-top: 35px; }   /* turunkan logo */
 .left-stack .illu-wrap{
     border:1px solid #d6eceb; border-radius:12px; padding:8px;
     background:#ffffffcc; box-shadow:0 6px 18px rgba(0,0,0,.05);
