@@ -104,10 +104,7 @@ with col_left:
     st.markdown('<div class="logo-wrap">', unsafe_allow_html=True)
     if logo:
         st.image(logo, width=240)  # ubah 200–280 sesuai selera
-    else:
-        st.markdown(
-            "<div style='font-weight:800; color:#007C80; font-size:1.2rem;'>Kemenkes<br/>RS Kariadi</div>",
-            unsafe_allow_html=True
+
         )
     st.markdown('</div>', unsafe_allow_html=True)
 
