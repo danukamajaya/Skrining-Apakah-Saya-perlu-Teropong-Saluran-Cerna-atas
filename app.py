@@ -105,7 +105,7 @@ col_logo, col_title, col_pic = st.columns([0.22, 0.56, 0.22])
 
 with col_logo:
     # turunkan logo sedikit via spacer agar tidak nempel
-    st.markdown("<div style='margin-top:70px'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-top:80px'></div>", unsafe_allow_html=True)
     if logo:
         st.image(logo, use_container_width=True)
     else:
@@ -118,7 +118,7 @@ with col_title:
     st.markdown(
         """
         <div class="title-text">
-          <h1 style='font-size:2rem; font-weight:600; color:#007C80; margin-top:20px; margin-bottom:0.25rem;'>
+          <h1 style='font-size:2rem; font-weight:750; color:#007C80; margin-top:30px; margin-bottom:0.25rem;'>
             Apakah Saya Perlu Teropong Saluran Cerna Atas?
           </h1>
           <p style='font-size:1rem; color:#333; margin-top:0.4rem;'>
@@ -135,7 +135,7 @@ with col_pic:
     if egd_img:
         st.markdown("<div class='illustration-wrap'>", unsafe_allow_html=True)
         # atur lebar ilustrasi di sini (misal 240–280)
-        st.image(egd_img, width=240, caption="Skema endoskopi saluran cerna atas")
+        st.image(egd_img, width=220, caption="Skema endoskopi saluran cerna atas")
         st.markdown("</div>", unsafe_allow_html=True)
 
 st.markdown("<hr style='margin-top:0.2rem;margin-bottom:0.8rem;border:1px solid #cfd8dc;'/>",
