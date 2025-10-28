@@ -129,7 +129,7 @@ with col_title:
 with col_pic:
     if egd_img:
         st.markdown("<div class='illustration-wrap'>", unsafe_allow_html=True)
-        st.image(egd_img, width=220, caption="Skema endoskopi saluran cerna atas")  # misal 220 px
+        st.image(egd_img, width=260, caption="Skema endoskopi saluran cerna atas")  # misal 220 px
         st.markdown("</div>", unsafe_allow_html=True)
 
 st.markdown("<hr style='margin-top:0.2rem;margin-bottom:0.8rem;border:1px solid #cfd8dc;'/>",
