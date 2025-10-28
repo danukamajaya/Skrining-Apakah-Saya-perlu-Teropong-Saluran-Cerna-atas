@@ -21,8 +21,9 @@ st.set_page_config(
 
 # ------------------ THEME & CSS ------------------
 CUSTOM_CSS = """
+CUSTOM_CSS = """
 <style>
-/* Sembunyikan sidebar & tombol collapse (jaga supaya rapi di HP/desktop) */
+/* Sembunyikan sidebar & tombol collapse */
 [data-testid="stSidebar"] { display: none !important; }
 [data-testid="collapsedControl"] { display: none !important; }
 
@@ -40,44 +41,79 @@ h1, h2, h3 { color:#007C80; }
 h1 { font-weight:800; }
 h2, h3 { font-weight:700; }
 
-/* Wrapper kolom kiri (logo + ilustrasi) */
-.left-stack .logo-wrap img{ margin-top: 35px; }   /* turunkan logo */
+/* Kolom kiri (logo + ilustrasi) */
+.left-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;        /* agar logo & gambar center rapi */
+}
+.left-stack .logo-wrap img{
+  margin-top: 40px;           /* 👉 menurunkan posisi logo */
+}
 .left-stack .illu-wrap{
-    border:1px solid #d6eceb; border-radius:12px; padding:8px;
-    background:#ffffffcc; box-shadow:0 6px 18px rgba(0,0,0,.05);
+  margin-top: 30px;           /* jarak antara logo & ilustrasi */
+  margin-left: 20px;          /* 👉 geser ilustrasi sedikit ke kanan */
+  border:1px solid #d6eceb;
+  border-radius:12px;
+  padding:8px;
+  background:#ffffffcc;
+  box-shadow:0 6px 18px rgba(0,0,0,.05);
 }
 
-/* Kolom kanan: turunkan judul */
-.right-title h1{ margin-top: 16px; } /* atur 12–40px sesuai selera */
+/* Kolom kanan (judul & deskripsi) */
+.right-title h1{
+  margin-top: 40px;           /* 👉 menurunkan posisi judul */
+  line-height: 1.15;
+  font-size: 2.8rem;
+  text-align: left;
+}
+.right-title p{
+  font-size: 1.05rem;
+  color:#333;
+  margin-top: 0.8rem;
+  text-align: left;
+}
 
-/* Expander header (data dasar + alasan) */
+/* Expander */
 .streamlit-expanderHeader{
-  background:#f0fdfa; color:#007C80; font-weight:700; border:1px solid #b2dfdb;
+  background:#f0fdfa;
+  color:#007C80;
+  font-weight:700;
+  border:1px solid #b2dfdb;
   border-radius:10px;
 }
 
 /* Kartu hasil */
 .result-card{
-  border:2px solid #00B3AD22; border-radius:14px; padding:1rem 1.2rem;
-  background:#ffffffcc; box-shadow:0 6px 18px rgba(0,0,0,.06);
+  border:2px solid #00B3AD22;
+  border-radius:14px;
+  padding:1rem 1.2rem;
+  background:#ffffffcc;
+  box-shadow:0 6px 18px rgba(0,0,0,.06);
 }
 
 /* Badge hasil */
 .badge{ display:inline-block; padding:.35rem .65rem; border-radius:999px; font-weight:700; }
-.badge-red{  background:#ffebee; color:#c62828; border:1px solid #ffcdd2; }
-.badge-green{background:#e8f5e9; color:#1b5e20; border:1px solid #c8e6c9; }
+.badge-red{ background:#ffebee; color:#c62828; border:1px solid #ffcdd2; }
+.badge-green{ background:#e8f5e9; color:#1b5e20; border:1px solid #c8e6c9; }
 .badge-gray{ background:#eceff1; color:#37474f; border:1px solid #cfd8dc; }
 
 /* Tombol reset */
-button[kind="secondary"]{ background:#00B3AD !important; color:#fff !important; border:none !important; }
+button[kind="secondary"]{
+  background:#00B3AD !important;
+  color:#fff !important;
+  border:none !important;
+}
 button[kind="secondary"]:hover{ background:#009b96 !important; }
 
-/* Footer catatan */
+/* Footer */
 .footer-note{ color:#004d40; font-size:.9rem; }
 
-/* Responsif HP (judul diperkecil sedikit) */
+/* Responsif HP */
 @media (max-width: 640px){
-  .right-title h1{ font-size: 2.05rem !important; }
+  .right-title h1{ font-size:2.05rem !important; margin-top:24px; }
+  .left-stack .logo-wrap img{ margin-top:20px; }
+  .left-stack .illu-wrap{ margin-left:0; }
 }
 </style>
 """
