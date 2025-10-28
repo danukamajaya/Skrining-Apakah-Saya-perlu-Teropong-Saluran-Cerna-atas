@@ -115,8 +115,7 @@ with col_left:
     # Ilustrasi (tepat di bawah logo)
     if egd_img:
         st.markdown('<div class="illustration-wrap">', unsafe_allow_html=True)
-        st.image(egd_img, width=ILU_WIDTH, caption="Skema endoskopi saluran cerna atas")
-        ILU_WIDTH = 380 
+        st.image(egd_img, width=280, caption="Skema endoskopi saluran cerna atas")
         st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
