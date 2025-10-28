@@ -44,7 +44,17 @@ h2, h3 { font-weight:700; }
 .left-stack {
   display: flex;
   flex-direction: column;
-  align-items: center;        /* agar logo & gambar center rapi */
+  align-items: center;  /* agar logo & gambar center rapi */
+}
+
+/* Turunkan logo RS Kariadi */
+.left-stack .logo-wrap {
+  margin-top: 80px !important;    /* 👉 turun seluruh container logo */
+}
+
+.left-stack .logo-wrap img,
+.left-stack [data-testid="stImage"] img {
+  margin-top: 0 !important;       /* pastikan tidak bentrok dengan default */
 }
 .left-stack .logo-wrap img{
   margin-top: 80px;           /* 👉 menurunkan posisi logo */
