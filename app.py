@@ -86,42 +86,45 @@ button[kind="secondary"]:hover { background:#009b96 !important; }
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
 # ------------------ HEADER: logo + judul + ilustrasi ------------------
-# Robust load logo
-logo = None
+logo, egd_img = None, None
 for p in ["logo_kariadi.png", "./logo_kariadi.png", "/app/logo_kariadi.png"]:
     if Path(p).exists():
-        logo = p
-        break
-
-# Robust load ilustrasi EGD
-egd_img = None
-for p in ["ilustrasi_egd.png", "egd_illustration.png", "egd_image.png", "egd.png"]:
+        logo = p; break
+for p in ["ilustrasi_egd.png", "egd_illustration.png", "egd_image.png"]:
     if Path(p).exists():
-        egd_img = p
-        break
+        egd_img = p; break
 
-# 3 kolom: logo | judul | ilustrasi
-col_logo, col_title, col_pic = st.columns([0.22, 0.56, 0.22])
+# 2 kolom: kiri = logo + ilustrasi (ditumpuk), kanan = judul + deskripsi
+col_left, col_right = st.columns([0.36, 0.64])
 
-with col_logo:
-    # turunkan logo sedikit via spacer agar tidak nempel
-    st.markdown("<div style='margin-top:80px'></div>", unsafe_allow_html=True)
+with col_left:
+    st.markdown('<div class="left-stack">', unsafe_allow_html=True)
+
+    # Logo (atas)
+    st.markdown('<div class="logo-wrap">', unsafe_allow_html=True)
     if logo:
-        st.image(logo, use_container_width=True)
+        st.image(logo, width=240)  # ubah 200–280 sesuai selera
     else:
         st.markdown(
-            "<div style='font-weight:800; color:#007C80; font-size:1.4rem;'>RSUP Dr. Kariadi</div>",
+            "<div style='font-weight:800; color:#007C80; font-size:1.2rem;'>Kemenkes<br/>RS Kariadi</div>",
             unsafe_allow_html=True
         )
+    st.markdown('</div>', unsafe_allow_html=True)
 
-with col_title:
+    # Ilustrasi (tepat di bawah logo)
+    if egd_img:
+        st.markdown('<div class="illustration-wrap">', unsafe_allow_html=True)
+        st.image(egd_img, use_container_width=True, caption="Skema endoskopi saluran cerna atas")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+with col_right:
     st.markdown(
         """
-        <div class="title-text">
-          <h1 style='font-size:2rem; font-weight:750; color:#007C80; margin-top:30px; margin-bottom:0.25rem;'>
-            Apakah Saya Perlu Teropong Saluran Cerna Atas?
-          </h1>
-          <p style='font-size:1rem; color:#333; margin-top:0.4rem;'>
+        <div class="right-title">
+          <h1>Apakah Saya Perlu Teropong Saluran Cerna Atas?</h1>
+          <p>
             Alat bantu sederhana untuk menilai apakah Anda mungkin memerlukan pemeriksaan
             teropong saluran cerna atas (<i>endoskopi/EGD</i>). Berdasarkan panduan klinis terbaru.
             Hasil bersifat edukasi, bukan diagnosis medis.
@@ -131,30 +134,8 @@ with col_title:
         unsafe_allow_html=True
     )
 
-with col_pic:
-    if egd_img:
-        st.markdown("<div class='illustration-wrap'>", unsafe_allow_html=True)
-        # atur lebar ilustrasi di sini (misal 240–280)
-        st.image(egd_img, width=220, caption="Skema endoskopi saluran cerna atas")
-        st.markdown("</div>", unsafe_allow_html=True)
-
-st.markdown("<hr style='margin-top:0.2rem;margin-bottom:0.8rem;border:1px solid #cfd8dc;'/>",
-            unsafe_allow_html=True)
-
-# ------------------ DATA DASAR (opsional) ------------------
-with st.expander("🧑‍⚕️ Data dasar (opsional)", expanded=False):
-    name = st.text_input("Nama", value="")
-    age  = st.number_input("Usia (tahun)", min_value=0, max_value=120, value=45, step=1)
-    sex  = st.selectbox("Jenis kelamin", ["Laki-laki", "Perempuan", "Lainnya"], index=0)
-
-# Defaults jika expander tidak dibuka (agar variabel selalu ada)
-if "age" not in locals(): age = 45
-if "sex" not in locals(): sex = "Laki-laki"
-if "name" not in locals(): name = ""
-
-today = datetime.today().strftime("%d %b %Y")
-
-st.markdown("---")
+# Garis pemisah
+st.markdown("<hr style='margin:.6rem 0 .9rem 0;border:1px solid #cfd8dc;'/>", unsafe_allow_html=True)
 
 # ------------------ DAFTAR CEKLIS ------------------
 ALARM_ITEMS = [
