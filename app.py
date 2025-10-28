@@ -60,8 +60,8 @@ h2, h3 { font-weight:700; }
   margin-top: 80px;           /* 👉 menurunkan posisi logo */
 }
 .left-stack .illu-wrap{
-  margin-top: 30px;           /* jarak antara logo & ilustrasi */
-  margin-left: 20px;          /* 👉 geser ilustrasi sedikit ke kanan */
+  margin-top: 10px;           /* jarak antara logo & ilustrasi */
+  margin-left: 30px;          /* 👉 geser ilustrasi sedikit ke kanan */
   border:1px solid #d6eceb;
   border-radius:12px;
   padding:8px;
