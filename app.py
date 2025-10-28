@@ -1,5 +1,5 @@
 # app.py — Skrining Endoskopi Saluran Cerna Atas (EGD)
-# Tema RS Kariadi • Tanpa Sidebar • Ilustrasi kanan-atas • Export PDF dg Kop Surat
+# Tema RS Kariadi • Header: kiri (logo+ilustrasi), kanan (judul) • Tanpa sidebar
 # © 2025 dr. Danu Kamajaya, Sp.PD – RS Kariadi Semarang
 
 import streamlit as st
@@ -7,12 +7,10 @@ from datetime import datetime
 from pathlib import Path
 from io import BytesIO
 
-# ---------- PDF ----------
+# PDF (reportlab)
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle
-from reportlab.lib import colors
-from reportlab.lib.units import cm
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 
 # ------------------ PAGE CONFIG ------------------
 st.set_page_config(
@@ -21,10 +19,10 @@ st.set_page_config(
     layout="wide",
 )
 
-# ------------------ THEME (RS Kariadi) ------------------
+# ------------------ THEME & CSS ------------------
 CUSTOM_CSS = """
 <style>
-/* Sembunyikan sidebar & tombol collapse (walau layout=wide) */
+/* Sembunyikan sidebar & tombol collapse (jaga supaya rapi di HP/desktop) */
 [data-testid="stSidebar"] { display: none !important; }
 [data-testid="collapsedControl"] { display: none !important; }
 
@@ -34,87 +32,97 @@ CUSTOM_CSS = """
   color: #1c1c1c;
 }
 
-/* Kontainer utama turun sedikit agar header tidak nempel tepi */
-.block-container { padding-top: 14px; padding-bottom: 2rem; }
+/* Ruang kontainer utama */
+.block-container { padding-top: 12px; padding-bottom: 2rem; }
 
+/* Judul / heading warna RS Kariadi */
 h1, h2, h3 { color:#007C80; }
 h1 { font-weight:800; }
 h2, h3 { font-weight:700; }
 
-/* Header layout */
-.header-wrap { padding: 6px 0 4px 0; }
-.title-text { text-align:center; }
+/* Wrapper kolom kiri (logo + ilustrasi) */
+.left-stack .logo-wrap img{ margin-top: 18px; }   /* turunkan logo */
+.left-stack .illu-wrap{
+    border:1px solid #d6eceb; border-radius:12px; padding:8px;
+    background:#ffffffcc; box-shadow:0 6px 18px rgba(0,0,0,.05);
+}
+
+/* Kolom kanan: turunkan judul */
+.right-title h1{ margin-top: 16px; } /* atur 12–40px sesuai selera */
 
 /* Expander header (data dasar + alasan) */
-.streamlit-expanderHeader {
+.streamlit-expanderHeader{
   background:#f0fdfa; color:#007C80; font-weight:700; border:1px solid #b2dfdb;
   border-radius:10px;
 }
 
 /* Kartu hasil */
-.result-card {
+.result-card{
   border:2px solid #00B3AD22; border-radius:14px; padding:1rem 1.2rem;
   background:#ffffffcc; box-shadow:0 6px 18px rgba(0,0,0,.06);
 }
 
 /* Badge hasil */
-.badge { display:inline-block; padding:.35rem .65rem; border-radius:999px; font-weight:700; }
-.badge-red  { background:#ffebee; color:#c62828; border:1px solid #ffcdd2; }
-.badge-green{ background:#e8f5e9; color:#1b5e20; border:1px solid #c8e6c9; }
-.badge-gray { background:#eceff1; color:#37474f; border:1px solid #cfd8dc; }
+.badge{ display:inline-block; padding:.35rem .65rem; border-radius:999px; font-weight:700; }
+.badge-red{  background:#ffebee; color:#c62828; border:1px solid #ffcdd2; }
+.badge-green{background:#e8f5e9; color:#1b5e20; border:1px solid #c8e6c9; }
+.badge-gray{ background:#eceff1; color:#37474f; border:1px solid #cfd8dc; }
 
 /* Tombol reset */
-button[kind="secondary"] { background:#00B3AD !important; color:#fff !important; border:none !important; }
-button[kind="secondary"]:hover { background:#009b96 !important; }
+button[kind="secondary"]{ background:#00B3AD !important; color:#fff !important; border:none !important; }
+button[kind="secondary"]:hover{ background:#009b96 !important; }
 
-/* Footer */
-.footer-note { color:#004d40; font-size:.9rem; }
+/* Footer catatan */
+.footer-note{ color:#004d40; font-size:.9rem; }
 
-/* Ilustrasi kanan: bingkai lembut */
-.illustration-wrap {
-  border:1px solid #d6eceb; border-radius:12px; padding:6px; background:#ffffffcc;
-  box-shadow:0 6px 18px rgba(0,0,0,.05);
-  margin-left:auto; margin-right:0;
-}
-
-/* Responsif HP */
+/* Responsif HP (judul diperkecil sedikit) */
 @media (max-width: 640px){
-  .title-text h1 { font-size:2.05rem !important; }
+  .right-title h1{ font-size: 2.05rem !important; }
 }
 </style>
 """
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
-# ------------------ HEADER: kiri (logo + ilustrasi), kanan (judul + deskripsi) ------------------
-# Deteksi file logo & ilustrasi
-logo, egd_img = None, None
-for p in ["logo_kariadi.png", "./logo_kariadi.png", "/app/logo_kariadi.png"]:
-    if Path(p).exists():
-        logo = p; break
-for p in ["ilustrasi_egd.png", "egd_illustration.png", "egd_image.png"]:
-    if Path(p).exists():
-        egd_img = p; break
+# ------------------ KONFIGURASI ELEMEN ------------------
+# Lebar ilustrasi (atur sesuai selera: 340–520)
+ILU_WIDTH = 420
 
-# 2 kolom: kiri = logo + ilustrasi (ditumpuk), kanan = judul + deskripsi
+# ------------------ LOAD ASSET (logo & ilustrasi) ------------------
+def find_first(path_list):
+    for p in path_list:
+        if Path(p).exists():
+            return p
+    return None
+
+logo_path = find_first(["logo_kariadi.png", "./logo_kariadi.png", "/app/logo_kariadi.png"])
+egd_img_path = find_first([
+    "ilustrasi_egd.png",
+    "egd_illustration.png",
+    "egd_image.png",
+    "ChatGPT Image 28 Okt 2025, 19.10.02.png"  # jika nama file seperti contoh
+])
+
+# ------------------ HEADER ------------------
 col_left, col_right = st.columns([0.36, 0.64])
 
 with col_left:
     st.markdown('<div class="left-stack">', unsafe_allow_html=True)
 
-    # Logo (atas)
-    st.markdown('<div class="logo-wrap">', unsafe_allow_html=True)
-    if logo:
-        st.image(logo, width=240)  # ubah 200–280 sesuai selera
+    # LOGO
+    if logo_path:
+        st.markdown('<div class="logo-wrap">', unsafe_allow_html=True)
+        st.image(logo_path, width=260)  # sesuaikan lebar logo
+        st.markdown('</div>', unsafe_allow_html=True)
     else:
-        st.markdown ("<hr style='margin:10px 0 12px;border:1px solid #cfd8dc;'/>",
-                unsafe_allow_html=True)
+        st.markdown(
+            "<div style='font-weight:800; color:#007C80; font-size:1.4rem'>Kemenkes<br/>RS Kariadi</div>",
+            unsafe_allow_html=True,
         )
-    st.markdown('</div>', unsafe_allow_html=True)
 
-    # Ilustrasi (tepat di bawah logo)
-    if egd_img:
-        st.markdown('<div class="illustration-wrap">', unsafe_allow_html=True)
-        st.image(egd_img, width=180, caption="Skema endoskopi saluran cerna atas")
+    # Ilustrasi
+    if egd_img_path:
+        st.markdown('<div class="illu-wrap" style="margin-top:10px;">', unsafe_allow_html=True)
+        st.image(egd_img_path, width=ILU_WIDTH, caption="Skema endoskopi saluran cerna atas")
         st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
@@ -123,8 +131,8 @@ with col_right:
     st.markdown(
         """
         <div class="right-title">
-          <h1>Apakah Saya Perlu Teropong Saluran Cerna Atas?</h1>
-          <p>
+          <h1>Apakah Saya Perlu Teropong<br/>Saluran Cerna Atas?</h1>
+          <p style="font-size:1.05rem; color:#333; margin-top:.4rem;">
             Alat bantu sederhana untuk menilai apakah Anda mungkin memerlukan pemeriksaan
             teropong saluran cerna atas (<i>endoskopi/EGD</i>). Berdasarkan panduan klinis terbaru.
             Hasil bersifat edukasi, bukan diagnosis medis.
@@ -134,8 +142,17 @@ with col_right:
         unsafe_allow_html=True
     )
 
-# Garis pemisah
-st.markdown("<hr style='margin:.6rem 0 .9rem 0;border:1px solid #cfd8dc;'/>", unsafe_allow_html=True)
+# (Tidak ada <hr> di sini — agar tidak muncul garis putih di bawah logo)
+
+# ------------------ DATA DASAR (opsional) ------------------
+with st.expander("🧑‍⚕️ Data dasar (opsional)", expanded=False):
+    name = st.text_input("Nama")
+    age  = st.number_input("Usia (tahun)", min_value=0, max_value=120, value=45, step=1)
+    sex  = st.selectbox("Jenis kelamin", ["Laki-laki", "Perempuan", "Lainnya"], index=0)
+
+today = datetime.today().strftime("%d %b %Y")
+
+st.markdown("---")
 
 # ------------------ DAFTAR CEKLIS ------------------
 ALARM_ITEMS = [
@@ -270,8 +287,7 @@ with st.expander("Alasan yang terdeteksi"):
     else:
         st.write("Tidak ada pilihan yang tercentang.")
 
-# ------------------ PDF EXPORT (KOP RS KARIADI) ------------------
-# ------------------ PDF EXPORT (KOP RS KARIADI) ------------------
+# ------------------ PDF EXPORT (sederhana) ------------------
 def build_pdf(name: str, age: int, sex: str, today: str,
               verdict_text: str, advice_md: str, reasons_list: list) -> bytes:
     """Bangun PDF hasil skrining dengan KOP RSUP Dr. Kariadi (return bytes)."""
@@ -389,8 +405,6 @@ def build_pdf(name: str, age: int, sex: str, today: str,
 
     doc.build(elements)
     return buffer.getvalue()
-
-# Bangun PDF dan tombol unduh
 pdf_bytes = build_pdf(name or "", int(age), sex, today, verdict_text, advice, reasons)
 
 st.download_button(
@@ -411,4 +425,4 @@ st.markdown(
     'Jika keluhan berat, mendadak, atau menetap, segera konsultasikan ke dokter penyakit dalam.</p>',
     unsafe_allow_html=True
 )
-st.caption("© 2025 | Aplikasi edukasi oleh **dr. Danu Kamajaya, Sp.PD** – RS Kariadi Semarang – Versi Awam")
+st.caption("© 2025 | Aplikasi edukasi oleh **dr. Danu Kamajaya, Sp.PD** – RSUP Dr. Kariadi Semarang – Versi Awam")
