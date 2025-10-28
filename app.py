@@ -96,7 +96,7 @@ for p in ["ilustrasi_egd.png", "egd_illustration.png", "egd_image.png"]:
         break
 
 # 3 kolom: logo | judul | ilustrasi
-col_logo, col_title, col_pic = st.columns([0.20, 0.55, 0.25])
+col_logo, col_title, col_pic = st.columns([0.20, 0.60, 0.35])
 
 with col_logo:
     # turunkan logo sedikit via spacer agar tidak nempel
