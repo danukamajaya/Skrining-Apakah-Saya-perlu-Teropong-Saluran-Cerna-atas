@@ -1,10 +1,16 @@
 # app.py — Skrining Endoskopi Saluran Cerna Atas (EGD)
-# Tema RS Kariadi • Tanpa Sidebar (Data dasar di expander)
-# © 2025 dr. Danu Kamajaya, Sp.PD – RSUP Dr. Kariadi Semarang
+# Tema RS Kariadi • Tanpa Sidebar • Ilustrasi kanan-atas • Export PDF
+# © 2025 dr. Danu Kamajaya, Sp.PD – RS Kariadi Semarang
 
 import streamlit as st
 from datetime import datetime
 from pathlib import Path
+from io import BytesIO
+
+# PDF
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 
 # ------------------ PAGE CONFIG ------------------
 st.set_page_config(
@@ -16,7 +22,7 @@ st.set_page_config(
 # ------------------ THEME (RS Kariadi) ------------------
 CUSTOM_CSS = """
 <style>
-/* Sembunyikan sidebar & tombol collapse */
+/* Sembunyikan sidebar & tombol collapse (walau layout=wide) */
 [data-testid="stSidebar"] { display: none !important; }
 [data-testid="collapsedControl"] { display: none !important; }
 
@@ -33,10 +39,6 @@ h1, h2, h3 { color:#007C80; }
 h1 { font-weight:800; }
 h2, h3 { font-weight:700; }
 
-/* Turunkan logo sedikit */
-div[data-testid="stImage"] img { margin-top: 40px; }
-
-/* Header spacing */
 .header-wrap { padding: 6px 0 4px 0; }
 
 /* Expander header (data dasar + alasan) */
@@ -64,6 +66,12 @@ button[kind="secondary"]:hover { background:#009b96 !important; }
 /* Footer */
 .footer-note { color:#004d40; font-size:.9rem; }
 
+/* Ilustrasi kanan: bingkai lembut */
+.illustration-wrap {
+  border:1px solid #d6eceb; border-radius:12px; padding:6px; background:#ffffffcc;
+  box-shadow:0 6px 18px rgba(0,0,0,.05);
+}
+
 /* Responsif HP */
 @media (max-width: 640px){
   .title-text h1 { font-size:2.05rem !important; }
@@ -72,18 +80,27 @@ button[kind="secondary"]:hover { background:#009b96 !important; }
 """
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
-# ------------------ HEADER + LOGO (robust load) ------------------
-# Coba beberapa path agar logo tidak “hilang” saat deploy
+# ------------------ HEADER: logo + judul + ilustrasi ------------------
+# Robus load logo
 logo = None
 for p in ["logo_kariadi.png", "./logo_kariadi.png", "/app/logo_kariadi.png"]:
     if Path(p).exists():
         logo = p
         break
 
-col_logo, col_title = st.columns([0.25, 0.75])
+# Robus load ilustrasi EGD
+egd_img = None
+for p in ["ilustrasi_egd.png", "egd_illustration.png", "egd_image.png"]:
+    if Path(p).exists():
+        egd_img = p
+        break
+
+# 3 kolom: logo | judul | ilustrasi
+col_logo, col_title, col_pic = st.columns([0.20, 0.55, 0.25])
 
 with col_logo:
-    st.markdown("<div style='margin-top:10px'></div>", unsafe_allow_html=True)  # turunkan sedikit
+    # turunkan logo sedikit via spacer agar tidak nempel
+    st.markdown("<div style='margin-top:10px'></div>", unsafe_allow_html=True)
     if logo:
         st.image(logo, use_container_width=True)
     else:
@@ -109,10 +126,16 @@ with col_title:
         unsafe_allow_html=True
     )
 
+with col_pic:
+    if egd_img:
+        st.markdown("<div class='illustration-wrap'>", unsafe_allow_html=True)
+        st.image(egd_img, use_container_width=True, caption="Skema endoskopi saluran cerna atas")
+        st.markdown("</div>", unsafe_allow_html=True)
+
 st.markdown("<hr style='margin-top:0.2rem;margin-bottom:0.8rem;border:1px solid #cfd8dc;'/>",
             unsafe_allow_html=True)
 
-# ------------------ DATA DASAR (opsional) di konten utama ------------------
+# ------------------ DATA DASAR (opsional) ------------------
 with st.expander("🧑‍⚕️ Data dasar (opsional)", expanded=False):
     name = st.text_input("Nama")
     age  = st.number_input("Usia (tahun)", min_value=0, max_value=120, value=45, step=1)
@@ -255,6 +278,59 @@ with st.expander("Alasan yang terdeteksi"):
     else:
         st.write("Tidak ada pilihan yang tercentang.")
 
+# ------------------ PDF EXPORT ------------------
+def build_pdf(name: str, age: int, sex: str, today: str,
+              verdict_text: str, advice_md: str, reasons_list: list) -> bytes:
+    """Membangun PDF hasil skrining (return bytes)."""
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4)
+    styles = getSampleStyleSheet()
+    elements = []
+
+    # Judul
+    elements.append(Paragraph("<b>Hasil Skrining Endoskopi Saluran Cerna Atas (EGD)</b>", styles["Title"]))
+    elements.append(Spacer(1, 12))
+
+    # Identitas
+    elements.append(Paragraph(f"<b>Tanggal:</b> {today}", styles["Normal"]))
+    if name:
+        elements.append(Paragraph(f"<b>Nama:</b> {name}", styles["Normal"]))
+    elements.append(Paragraph(f"<b>Usia:</b> {age} tahun", styles["Normal"]))
+    elements.append(Paragraph(f"<b>Jenis kelamin:</b> {sex}", styles["Normal"]))
+    elements.append(Spacer(1, 12))
+
+    # Hasil utama
+    elements.append(Paragraph(f"<b>Kesimpulan:</b> {verdict_text}", styles["Normal"]))
+    elements.append(Spacer(1, 6))
+    elements.append(Paragraph(advice_md.replace("\n", "<br/>"), styles["Normal"]))
+    elements.append(Spacer(1, 12))
+
+    # Alasan
+    if reasons_list:
+        elements.append(Paragraph("<b>Faktor yang terdeteksi:</b>", styles["Normal"]))
+        for r in reasons_list:
+            elements.append(Paragraph(f"- {r}", styles["Normal"]))
+        elements.append(Spacer(1, 12))
+
+    # Catatan
+    elements.append(Paragraph(
+        "Hasil ini bersifat edukatif dan tidak menggantikan penilaian dokter. "
+        "Jika keluhan berat, mendadak, atau menetap, segera konsultasikan ke dokter penyakit dalam.",
+        styles["Italic"]
+    ))
+
+    doc.build(elements)
+    return buffer.getvalue()
+
+pdf_bytes = build_pdf(name or "", int(age), sex, today, verdict_text, advice, reasons)
+
+st.download_button(
+    label="⬇️ Unduh Hasil Skrining (PDF)",
+    data=pdf_bytes,
+    file_name=f"Hasil_Skrining_EGD_{today.replace(' ', '_')}.pdf",
+    mime="application/pdf",
+)
+
 # ------------------ FOOTER ------------------
 st.markdown("---")
 st.markdown(
@@ -266,4 +342,4 @@ st.markdown(
     'Jika keluhan berat, mendadak, atau menetap, segera konsultasikan ke dokter penyakit dalam.</p>',
     unsafe_allow_html=True
 )
-st.caption("© 2025 | Aplikasi edukasi oleh **dr. Danu Kamajaya, Sp.PD** – RSUP Dr. Kariadi Semarang – Versi Awam")
+st.caption("© 2025 | Aplikasi edukasi oleh **dr. Danu Kamajaya, Sp.PD** – RS Kariadi Semarang – Versi Awam")
