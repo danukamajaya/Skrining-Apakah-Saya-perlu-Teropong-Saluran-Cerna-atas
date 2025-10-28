@@ -100,7 +100,7 @@ col_logo, col_title, col_pic = st.columns([0.20, 0.55, 0.25])
 
 with col_logo:
     # turunkan logo sedikit via spacer agar tidak nempel
-    st.markdown("<div style='margin-top:25px'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-top:40px'></div>", unsafe_allow_html=True)
     if logo:
         st.image(logo, use_container_width=True)
     else:
