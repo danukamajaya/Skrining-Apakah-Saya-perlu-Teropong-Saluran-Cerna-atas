@@ -86,6 +86,8 @@ button[kind="secondary"]:hover { background:#009b96 !important; }
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
 # ------------------ HEADER: logo + judul + ilustrasi ------------------
+# ------------------ HEADER: kiri (logo + ilustrasi), kanan (judul + deskripsi) ------------------
+# Deteksi file logo & ilustrasi
 logo, egd_img = None, None
 for p in ["logo_kariadi.png", "./logo_kariadi.png", "/app/logo_kariadi.png"]:
     if Path(p).exists():
@@ -104,14 +106,17 @@ with col_left:
     st.markdown('<div class="logo-wrap">', unsafe_allow_html=True)
     if logo:
         st.image(logo, width=240)  # ubah 200–280 sesuai selera
-
+    else:
+        st.markdown(
+            "<div style='font-weight:800; color:#007C80; font-size:1.2rem;'>Kemenkes<br/>RS Kariadi</div>",
+            unsafe_allow_html=True
         )
     st.markdown('</div>', unsafe_allow_html=True)
 
     # Ilustrasi (tepat di bawah logo)
     if egd_img:
         st.markdown('<div class="illustration-wrap">', unsafe_allow_html=True)
-        st.image(egd_img, use_container_width=280, caption="Skema endoskopi saluran cerna atas")
+        st.image(egd_img, use_container_width=True, caption="Skema endoskopi saluran cerna atas")
         st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
