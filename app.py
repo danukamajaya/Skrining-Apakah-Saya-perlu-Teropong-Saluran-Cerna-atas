@@ -290,19 +290,39 @@ with st.expander("Alasan yang terdeteksi"):
         st.write("Tidak ada pilihan yang tercentang.")
 
 # ------------------ PDF EXPORT (KOP RS KARIADI) ------------------
+# ------------------ PDF EXPORT (KOP RS KARIADI) ------------------
 def build_pdf(name: str, age: int, sex: str, today: str,
               verdict_text: str, advice_md: str, reasons_list: list) -> bytes:
     """Bangun PDF hasil skrining dengan KOP RSUP Dr. Kariadi (return bytes)."""
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle
+    from reportlab.lib import colors
+    from reportlab.lib.units import cm
+    from pathlib import Path
+    from io import BytesIO
+    import re
+
+    # helper: konversi **bold** markdown → <b>bold</b>
+    def md_to_html_bold(s: str) -> str:
+        # ganti **teks** menjadi <b>teks</b>
+        return re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", s)
+
+    # helper: buang emoji di awal (🔴/🟢/⚪) agar tidak jadi kotak
+    def strip_leading_emoji(s: str) -> str:
+        return s.lstrip("🔴🟢⚪ ").strip()
+
     buffer = BytesIO()
     doc = SimpleDocTemplate(
-        buffer,
-        pagesize=A4,
-        leftMargin=2*cm, rightMargin=2*cm, topMargin=1.6*cm, bottomMargin=1.6*cm
+        buffer, pagesize=A4,
+        leftMargin=2*cm, rightMargin=2*cm,
+        topMargin=1.6*cm, bottomMargin=1.6*cm
     )
 
     styles = getSampleStyleSheet()
     normal = styles["Normal"]
     title  = styles["Title"]
+    italic = ParagraphStyle("i", parent=normal, italic=True)
 
     # cari logo RS
     logo_rs = None
@@ -342,14 +362,12 @@ def build_pdf(name: str, age: int, sex: str, today: str,
     ]))
     elements.append(kop_tbl)
     elements.append(Spacer(1, 4))
-
-    # garis pembatas
     elements.append(Table([[""]], colWidths=[doc.width], style=TableStyle([
         ("LINEBELOW", (0,0), (-1,-1), 1.2, colors.HexColor("#9EC9C7"))
     ])))
     elements.append(Spacer(1, 10))
 
-    # Judul dokumen
+    # Judul
     elements.append(Paragraph("<b>HASIL SKRINING ENDOSKOPI SALURAN CERNA ATAS (EGD)</b>", title))
     elements.append(Spacer(1, 8))
 
@@ -365,20 +383,23 @@ def build_pdf(name: str, age: int, sex: str, today: str,
     elements = [e for e in elements if e is not None]
 
     # Hasil utama
-    elements.append(P(f"<b>Kesimpulan:</b> {verdict_text}"))
+    vt = strip_leading_emoji(verdict_text)               # hilangkan emoji
+    vt = md_to_html_bold(vt)                             # konversi **bold**
+    adv = md_to_html_bold(advice_md).replace("\n", "<br/>")
+
+    elements.append(P(f"<b>Kesimpulan:</b> {vt}"))
     elements.append(Spacer(1, 6))
-    elements.append(P(advice_md.replace("\n", "<br/>")))
+    elements.append(P(adv))
     elements.append(Spacer(1, 8))
 
-    # Alasan terdeteksi
+    # Alasan (juga konversi **bold**)
     if reasons_list:
         elements.append(P("<b>Faktor yang terdeteksi:</b>"))
         for r in reasons_list:
-            elements.append(P(f"- {r}"))
+            elements.append(P("- " + md_to_html_bold(r)))
         elements.append(Spacer(1, 8))
 
     # Catatan
-    italic = ParagraphStyle("i", parent=normal, italic=True)
     elements.append(Paragraph(
         "Hasil ini bersifat edukatif dan tidak menggantikan penilaian dokter. "
         "Jika keluhan berat, mendadak, atau menetap, segera konsultasikan ke dokter penyakit dalam.",
