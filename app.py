@@ -152,8 +152,6 @@ col_left, col_right = st.columns([0.36, 0.64])
 
 with col_left:
     st.markdown("<div style='height:60px'></div>", unsafe_allow_html=True)  # Spacer tambahan
-    if logo_path:
-        st.image(logo_path, width=260)
 
     # LOGO
     if logo_path:
