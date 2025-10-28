@@ -166,7 +166,7 @@ with col_left:
 
     # Ilustrasi
     if egd_img_path:
-        st.markdown('<div class="illu-wrap" style="margin-top:10px;">', unsafe_allow_html=True)
+        st.markdown('<div class="illu-wrap" style="margin-top:5px;">', unsafe_allow_html=True)
         st.image(egd_img_path, width=180, caption="Skema endoskopi saluran cerna atas")
         st.markdown('</div>', unsafe_allow_html=True)
 
