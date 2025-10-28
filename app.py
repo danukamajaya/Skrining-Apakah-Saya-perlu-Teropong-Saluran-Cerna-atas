@@ -118,7 +118,7 @@ with col_title:
     st.markdown(
         """
         <div class="title-text">
-          <h1 style='font-size:2.6rem; font-weight:800; color:#007C80; margin-top:16px; margin-bottom:0.25rem;'>
+          <h1 style='font-size:2rem; font-weight:600; color:#007C80; margin-top:20px; margin-bottom:0.25rem;'>
             Apakah Saya Perlu Teropong Saluran Cerna Atas?
           </h1>
           <p style='font-size:1rem; color:#333; margin-top:0.4rem;'>
