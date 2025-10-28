@@ -105,7 +105,7 @@ col_logo, col_title, col_pic = st.columns([0.22, 0.56, 0.22])
 
 with col_logo:
     # turunkan logo sedikit via spacer agar tidak nempel
-    st.markdown("<div style='margin-top:60px'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-top:70px'></div>", unsafe_allow_html=True)
     if logo:
         st.image(logo, use_container_width=True)
     else:
@@ -121,7 +121,7 @@ with col_title:
           <h1 style='font-size:2.6rem; font-weight:800; color:#007C80; margin-top:16px; margin-bottom:0.25rem;'>
             Apakah Saya Perlu Teropong Saluran Cerna Atas?
           </h1>
-          <p style='font-size:1.05rem; color:#333; margin-top:0.4rem;'>
+          <p style='font-size:1rem; color:#333; margin-top:0.4rem;'>
             Alat bantu sederhana untuk menilai apakah Anda mungkin memerlukan pemeriksaan
             teropong saluran cerna atas (<i>endoskopi/EGD</i>). Berdasarkan panduan klinis terbaru.
             Hasil bersifat edukasi, bukan diagnosis medis.
