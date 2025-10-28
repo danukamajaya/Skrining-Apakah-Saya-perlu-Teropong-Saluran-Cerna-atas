@@ -47,7 +47,7 @@ h2, h3 { font-weight:700; }
   align-items: center;        /* agar logo & gambar center rapi */
 }
 .left-stack .logo-wrap img{
-  margin-top: 40px;           /* 👉 menurunkan posisi logo */
+  margin-top: 55px;           /* 👉 menurunkan posisi logo */
 }
 .left-stack .illu-wrap{
   margin-top: 30px;           /* jarak antara logo & ilustrasi */
