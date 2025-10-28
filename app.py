@@ -85,7 +85,6 @@ button[kind="secondary"]:hover { background:#009b96 !important; }
 """
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
-# ------------------ HEADER: logo + judul + ilustrasi ------------------
 # ------------------ HEADER: kiri (logo + ilustrasi), kanan (judul + deskripsi) ------------------
 # Deteksi file logo & ilustrasi
 logo, egd_img = None, None
@@ -116,7 +115,8 @@ with col_left:
     # Ilustrasi (tepat di bawah logo)
     if egd_img:
         st.markdown('<div class="illustration-wrap">', unsafe_allow_html=True)
-        st.image(egd_img, use_container_width=True, caption="Skema endoskopi saluran cerna atas")
+        st.image(egd_img, width=ILU_WIDTH, caption="Skema endoskopi saluran cerna atas")
+        ILU_WIDTH = 380 
         st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
