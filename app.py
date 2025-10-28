@@ -335,7 +335,7 @@ def build_pdf(name: str, age: int, sex: str, today: str,
 
     # KOP SURAT: logo kiri + teks tengah
     if logo_rs:
-        img_rs = Image(logo_rs, width=3.2*cm, height=3.2*cm, hAlign='LEFT')
+        img_rs = Image(logo_rs, width=3.2*cm, height=2*cm, hAlign='LEFT')
     else:
         img_rs = Paragraph("<b>RSUP Dr. Kariadi</b>", normal)
 
